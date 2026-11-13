@@ -1,50 +1,60 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# vscode-extensions Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. User-Focused Extensions
+Every extension MUST address a clear user workflow and provide a coherent, discoverable
+experience. Features MUST remain within the extension's stated purpose; unrelated behavior
+requires a separate justification. This keeps the collection focused and useful.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Native VS Code Integration
+Extensions MUST use documented VS Code extension APIs and platform contribution points for
+commands, settings, and interface elements. They MUST respect the user's configured
+environment and avoid surprising changes to workspace or editor state.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Privacy and Security by Default
+Extensions MUST request and use only the access and data needed for their stated functionality.
+They MUST NOT expose secrets or send workspace or user data to external services without a
+clear, documented feature need and user awareness. Inputs from workspaces and external sources
+MUST be treated as untrusted.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Verifiable Quality
+Changes to observable behavior MUST include automated tests for the principal behavior and
+relevant failure cases. Contributors MUST run the existing checks applicable to the change.
+When automation is impractical, the change description MUST record the manual verification
+performed.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Simplicity and Compatibility
+Extensions MUST keep dependencies, activation, and configuration limited to what their features
+require. They MUST declare and respect their supported VS Code version range. Breaking changes
+MUST be intentional, documented, and justified by user value.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Additional Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+Each extension MUST have a clear identity and documented purpose. Manifests MUST declare the
+extension's supported VS Code engine range and only the commands, settings, and other
+contributions it needs. New dependencies MUST be justified by functionality that cannot be
+reasonably provided with existing platform APIs or project dependencies.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Feature work MUST follow the repository's Spec Kit workflow: specify, plan, generate tasks,
+implement, and converge. Clarification and analysis steps MUST be used when requirements or
+design consistency warrant them. Implementation changes MUST be reviewed against these
+principles and validated with the existing checks relevant to the affected extension.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution governs project decisions and supersedes conflicting local practices.
+Amendments MUST be made in this file, state their rationale in the change description, and
+include any required migration or compatibility implications. A change MUST NOT be considered
+complete until its compliance with these principles and its applicable validation results have
+been reviewed.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Versioning follows semantic versioning: MAJOR for incompatible changes to principles or
+governance, MINOR for new principles or materially expanded requirements, and PATCH for
+clarifications or non-semantic wording changes. The version and amendment date MUST be updated
+with every amendment. Contributors and reviewers MUST identify and resolve any conflict with
+this constitution before approval.
+
+**Version**: 1.0.0 | **Ratified**: 2026-11-13 | **Last Amended**: 2026-11-13
