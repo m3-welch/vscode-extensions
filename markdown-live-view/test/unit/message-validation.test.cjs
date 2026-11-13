@@ -78,7 +78,8 @@ test('normalizes restored selections and scroll state to current document bounds
         { anchor: 10, head: 10 }
       ],
       primaryIndex: 1,
-      scrollTop: 0
+      scrollTop: 0,
+      scrollAnchor: 0
     }
   );
 });

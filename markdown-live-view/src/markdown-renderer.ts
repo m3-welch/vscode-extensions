@@ -1,5 +1,5 @@
 import { markdownLanguage } from '@codemirror/lang-markdown';
-import { GFM } from '@lezer/markdown';
+import { syntaxTree } from '@codemirror/language';
 import { Decoration, EditorView, ViewPlugin, ViewUpdate, WidgetType } from '@codemirror/view';
 import { Range, RangeSetBuilder } from '@codemirror/state';
 
@@ -15,6 +15,11 @@ export interface MarkdownElement {
 export interface TextSelectionRange {
   from: number;
   to: number;
+}
+
+interface MarkdownAnalysis {
+  elements: MarkdownElement[];
+  syntaxRanges: Array<{ from: number; to: number }>;
 }
 
 const parser = markdownLanguage.parser;
@@ -41,9 +46,12 @@ const nodeKinds: Record<string, string> = {
   Table: 'table'
 };
 
-export function extractMarkdownElements(markdown: string): MarkdownElement[] {
-  const tree = parser.parse(markdown);
+function analyzeMarkdown(
+  markdown: string,
+  tree = parser.parse(markdown)
+): MarkdownAnalysis {
   const elements: MarkdownElement[] = [];
+  const syntaxRanges: Array<{ from: number; to: number }> = [];
 
   tree.iterate({
     enter(node: { name: string; from: number; to: number }) {
@@ -74,7 +82,19 @@ export function extractMarkdownElements(markdown: string): MarkdownElement[] {
     }
   });
 
-  return elements;
+  tree.iterate({
+    enter(node: { name: string; from: number; to: number }) {
+      if (node.name.endsWith('Mark') || node.name === 'URL') {
+        syntaxRanges.push({ from: node.from, to: node.to });
+      }
+    }
+  });
+
+  return { elements, syntaxRanges };
+}
+
+export function extractMarkdownElements(markdown: string): MarkdownElement[] {
+  return analyzeMarkdown(markdown).elements;
 }
 
 export function isElementActive(
@@ -110,7 +130,12 @@ class LocalImageWidget extends WidgetType {
     const image = document.createElement('img');
     image.alt = this.alt;
     image.loading = 'lazy';
-    image.src = new URL(this.source, this.baseUri).toString();
+    try {
+      image.src = new URL(this.source, this.baseUri).toString();
+    } catch {
+      container.textContent = this.alt || 'Image';
+      return container;
+    }
     container.append(image);
     return container;
   }
@@ -218,14 +243,20 @@ function isSafeRelativeImage(source: string): boolean {
   return !decodedSource.split(/[\\/]/).some((part) => part === '..');
 }
 
-function decorationsFor(view: EditorView, baseUri: string): Range<Decoration>[] {
-  const source = view.state.doc.toString();
-  const tree = parser.parse(source);
-  const elements = extractMarkdownElements(source);
+function decorationsFor(
+  view: EditorView,
+  baseUri: string,
+  analysis: MarkdownAnalysis
+): Range<Decoration>[] {
+  const { elements, syntaxRanges } = analysis;
   const selections = view.state.selection.ranges.map(({ from, to }) => ({ from, to }));
   const inactiveElements = elements.filter((element) => !isElementActive(element, selections));
+  const widgetElements = inactiveElements.filter(
+    (element) =>
+      element.kind === 'table' || (element.kind === 'image' && Boolean(element.imageSrc))
+  );
   const decorations: Range<Decoration>[] = [];
-  const syntaxRanges = new Set<string>();
+  const addedSyntaxRanges = new Set<string>();
 
   const add = (from: number, to: number, decoration: Decoration) => {
     if (from >= 0 && to > from && to <= view.state.doc.length) {
@@ -266,25 +297,25 @@ function decorationsFor(view: EditorView, baseUri: string): Range<Decoration>[] 
 
   }
 
-  tree.iterate({
-    enter(node: { name: string; from: number; to: number }) {
-      if (!node.name.endsWith('Mark') && node.name !== 'URL') {
-        return;
-      }
-      const isInactiveSyntax = inactiveElements.some(
-        (element) => node.from >= element.from && node.to <= element.to
-      );
-      if (isInactiveSyntax) {
-        const key = `${node.from}:${node.to}`;
-        if (!syntaxRanges.has(key)) {
-          syntaxRanges.add(key);
-          add(node.from, node.to, Decoration.replace({}));
-        }
+  for (const node of syntaxRanges) {
+    if (widgetElements.some((element) => node.from >= element.from && node.to <= element.to)) {
+      continue;
+    }
+    const isInactiveSyntax = inactiveElements.some(
+      (element) => node.from >= element.from && node.to <= element.to
+    );
+    if (isInactiveSyntax) {
+      const key = `${node.from}:${node.to}`;
+      if (!addedSyntaxRanges.has(key)) {
+        addedSyntaxRanges.add(key);
+        add(node.from, node.to, Decoration.replace({}));
       }
     }
-  });
+  }
 
-  decorations.sort((a, b) => a.from - b.from || a.to - b.to);
+  decorations.sort(
+    (a, b) => a.from - b.from || a.value.startSide - b.value.startSide || a.to - b.to
+  );
   return decorations;
 }
 
@@ -292,12 +323,20 @@ export function createMarkdownRenderingExtension(baseUri: string) {
   return ViewPlugin.fromClass(
     class {
       decorations;
+      analysis: MarkdownAnalysis;
 
       constructor(view: EditorView) {
+        this.analysis = analyzeMarkdown(view.state.doc.toString(), syntaxTree(view.state));
         this.decorations = this.build(view);
       }
 
       update(update: ViewUpdate) {
+        if (update.docChanged) {
+          this.analysis = analyzeMarkdown(
+            update.state.doc.toString(),
+            syntaxTree(update.state)
+          );
+        }
         if (update.docChanged || update.selectionSet || update.viewportChanged) {
           this.decorations = this.build(update.view);
         }
@@ -305,7 +344,7 @@ export function createMarkdownRenderingExtension(baseUri: string) {
 
       private build(view: EditorView) {
         const builder = new RangeSetBuilder<Decoration>();
-        for (const range of decorationsFor(view, baseUri)) {
+        for (const range of decorationsFor(view, baseUri, this.analysis)) {
           builder.add(range.from, range.to, range.value);
         }
         return builder.finish();

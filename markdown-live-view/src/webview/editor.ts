@@ -16,6 +16,14 @@ interface SyncMessage {
   viewState?: StoredViewState;
 }
 
+function requestHistory(action: 'undo' | 'redo'): void {
+  if (pendingTransaction || queuedChanges.length > 0) {
+    pendingHistoryAction = action;
+    return;
+  }
+  vscode.postMessage({ type: action });
+}
+
 const vscode = acquireVsCodeApi();
 const editorHost = document.getElementById('editor');
 if (!editorHost) {
@@ -29,6 +37,7 @@ let currentBaseUri = '';
 let isApplyingRemoteChange = false;
 let transactionCounter = 0;
 let pendingTransaction = false;
+let pendingHistoryAction: 'undo' | 'redo' | undefined;
 const queuedChanges: Array<Array<{ from: number; to: number; insert: string }>> = [];
 
 function sendViewState(): void {
@@ -47,7 +56,14 @@ function sendViewState(): void {
 }
 
 function sendNextEdit(): void {
-  if (pendingTransaction || queuedChanges.length === 0 || currentVersion < 0 || !editor) {
+  if (pendingTransaction || currentVersion < 0 || !editor) {
+    return;
+  }
+  if (queuedChanges.length === 0) {
+    if (pendingHistoryAction) {
+      vscode.postMessage({ type: pendingHistoryAction });
+      pendingHistoryAction = undefined;
+    }
     return;
   }
 
@@ -83,6 +99,7 @@ function initialize(message: SyncMessage): void {
   currentBaseUri = message.baseUri;
   queuedChanges.length = 0;
   pendingTransaction = false;
+  pendingHistoryAction = undefined;
 
   if (!editor) {
     editor = new EditorView({
@@ -98,21 +115,21 @@ function initialize(message: SyncMessage): void {
             {
               key: 'Mod-z',
               run: () => {
-                vscode.postMessage({ type: 'undo' });
+                    requestHistory('undo');
                 return true;
               }
             },
             {
               key: 'Mod-Shift-z',
               run: () => {
-                vscode.postMessage({ type: 'redo' });
+                requestHistory('redo');
                 return true;
               }
             },
             {
               key: 'Mod-y',
               run: () => {
-                vscode.postMessage({ type: 'redo' });
+                requestHistory('redo');
                 return true;
               }
             }

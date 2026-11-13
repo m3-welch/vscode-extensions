@@ -48,6 +48,11 @@ test('extracts all required supported Markdown element kinds and exact ranges', 
     assert.ok(element.to > element.from);
     assert.equal(markdown.slice(element.from, element.to).length, element.to - element.from);
   }
+  const image = elements.find((element) => element.kind === 'image');
+  const table = elements.find((element) => element.kind === 'table');
+  assert.equal(image.imageAlt, 'alt');
+  assert.equal(image.imageSrc, 'image.png');
+  assert.match(table.tableSource, /\| A \| B \|/);
 });
 
 test('marks all selected or caret-containing elements active, including boundaries', () => {
@@ -67,4 +72,13 @@ test('leaves empty and plain-text content without invented elements', () => {
     extractMarkdownElements('plain text').some((element) => element.kind !== 'paragraph'),
     false
   );
+});
+
+test('parses a large document into independently addressable blocks', () => {
+  const markdown = Array.from({ length: 1000 }, (_, index) => `## Section ${index}\n\nText ${index}.`).join(
+    '\n\n'
+  );
+  const elements = extractMarkdownElements(markdown);
+  assert.equal(elements.filter((element) => element.kind === 'heading').length, 1000);
+  assert.equal(elements.filter((element) => element.kind === 'paragraph').length, 1000);
 });

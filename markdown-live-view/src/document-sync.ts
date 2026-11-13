@@ -151,7 +151,7 @@ export class DocumentSync {
     const resourceRoot =
       folder?.uri ??
       (document.uri.scheme === 'file'
-        ? vscode.Uri.file(require('node:path').dirname(document.uri.fsPath))
+        ? vscode.Uri.file(path.dirname(document.uri.fsPath))
         : vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'webview'));
     const imageBase =
       document.uri.scheme === 'file'

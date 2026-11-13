@@ -1,4 +1,5 @@
 import * as path from 'node:path';
+import { randomBytes } from 'node:crypto';
 import * as vscode from 'vscode';
 import { DocumentSync, WebviewPanelState } from './document-sync';
 import { StoredViewState } from './view-state';
@@ -35,21 +36,22 @@ export class MarkdownLiveViewProvider implements vscode.CustomTextEditorProvider
       document,
       disposables: []
     };
+    panelState.disposables.push(
+      panel.webview.onDidReceiveMessage((message: unknown) => {
+        if (
+          message &&
+          typeof message === 'object' &&
+          (message as { type?: string }).type === 'selection'
+        ) {
+          const viewState = (message as { viewState?: StoredViewState }).viewState;
+          if (viewState) {
+            this.viewStates.set(document.uri.toString(), viewState);
+          }
+        }
+      })
+    );
     panel.onDidDispose(() => this.rememberState(document.uri, panelState));
     this.sync.attach(panelState, this.viewStates.get(document.uri.toString()));
-
-    panel.webview.onDidReceiveMessage((message: unknown) => {
-      if (
-        message &&
-        typeof message === 'object' &&
-        (message as { type?: string }).type === 'selection'
-      ) {
-        const viewState = (message as { viewState?: StoredViewState }).viewState;
-        if (viewState) {
-          this.viewStates.set(document.uri.toString(), viewState);
-        }
-      }
-    });
   }
 
   async openLive(uri: vscode.Uri, state?: StoredViewState): Promise<void> {
@@ -134,6 +136,5 @@ export class MarkdownLiveViewProvider implements vscode.CustomTextEditorProvider
 }
 
 function createNonce(): string {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  return Array.from({ length: 32 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+  return randomBytes(16).toString('base64');
 }

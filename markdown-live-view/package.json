@@ -45,17 +45,18 @@
     ]
   },
   "scripts": {
-    "compile": "node esbuild.js",
+    "compile": "node esbuild.js && tsc",
+    "vscode:prepublish": "npm run compile",
     "check-types": "tsc --noEmit",
     "test:unit": "npm run compile && node --test test/unit/*.test.cjs",
     "test:integration": "npm run compile && node test/runTest.cjs",
     "test": "npm run check-types && npm run test:unit && npm run test:integration"
   },
   "devDependencies": {
+    "@codemirror/language": "^6.13.1",
     "@codemirror/lang-markdown": "^6.5.2",
     "@codemirror/state": "^6.7.6",
     "@codemirror/view": "^6.43.15",
-    "@lezer/markdown": "^1.8.1",
     "@types/node": "^22.15.30",
     "@types/vscode": "^1.146.0",
     "@vscode/test-electron": "^3.1.0",

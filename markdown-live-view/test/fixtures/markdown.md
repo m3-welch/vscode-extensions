@@ -2,7 +2,7 @@
 
 A paragraph with **bold**, *italic*, ~~strikethrough~~, `inline code`, and [a link](https://example.com).
 
-![A local image](images/example.png)
+![A local image](images/example.svg)
 
 - First item
 - Second item

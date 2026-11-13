@@ -39,6 +39,7 @@ export function isWebviewEditMessage(
   }
 
   let insertedLength = 0;
+  let previousFrom = -1;
   let previousTo = -1;
   for (const change of message.changes) {
     if (
@@ -49,6 +50,7 @@ export function isWebviewEditMessage(
       change.to < change.from ||
       change.to > documentLength ||
       change.from < previousTo ||
+      (change.from === previousFrom && change.from === change.to && previousTo === previousFrom) ||
       typeof change.insert !== 'string'
     ) {
       return false;
@@ -58,6 +60,7 @@ export function isWebviewEditMessage(
     if (insertedLength > MAX_INSERT_LENGTH) {
       return false;
     }
+    previousFrom = change.from;
     previousTo = change.to;
   }
 

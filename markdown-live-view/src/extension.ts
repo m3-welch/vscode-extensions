@@ -13,7 +13,10 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
       const editor = vscode.window.activeTextEditor;
-      const state = editor ? stateFromEditor(editor) : provider.currentViewState(uri);
+      const state =
+        editor?.document.uri.toString() === uri.toString()
+          ? stateFromEditor(editor)
+          : provider.currentViewState(uri);
       await provider.openLive(uri, state);
     }),
     vscode.commands.registerCommand('markdownLiveView.openSource', async () => {
@@ -55,7 +58,14 @@ function stateFromEditor(editor: vscode.TextEditor): StoredViewState {
       anchor: Math.min(editor.document.offsetAt(selection.anchor), textLength),
       head: Math.min(editor.document.offsetAt(selection.active), textLength)
     })),
-    primaryIndex: Math.max(0, editor.selections.indexOf(editor.selection)),
+    primaryIndex: Math.max(
+      0,
+      editor.selections.findIndex(
+        (selection) =>
+          selection.anchor.isEqual(editor.selection.anchor) &&
+          selection.active.isEqual(editor.selection.active)
+      )
+    ),
     scrollTop: 0,
     scrollAnchor: editor.document.offsetAt(editor.visibleRanges[0]?.start ?? new vscode.Position(0, 0))
   };
