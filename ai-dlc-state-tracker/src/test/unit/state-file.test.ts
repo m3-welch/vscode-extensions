@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyFileRead, selectWorkspaceFolder } from '../../state-file';
+import { classifyFileRead, selectWorkspaceFolder } from '../../state-file-model';
 
 test('selects the active editor folder when it belongs to the workspace', () => {
 	const folders = [{ name: 'first' }, { name: 'active' }];

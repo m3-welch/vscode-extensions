@@ -13,11 +13,10 @@ This guide describes validation scenarios for the extension package after implem
 From `ai-dlc-state-tracker/`:
 
 1. Install the package dependencies with `npm install`.
-2. Run the package's compile script.
-3. Run the unit and Extension Development Host integration tests using the package's test script.
-4. Package a VSIX and verify that the generated package includes the compiled extension and renderer assets.
-
-The exact script names will follow the scaffolded package configuration.
+2. Run `npm run compile` for type checking, linting, and bundle generation.
+3. Run `npm run test:unit` for isolated unit tests.
+4. Run `npm run test:extension-host` for Extension Development Host integration tests.
+5. Run `npm run vsix` and verify that the generated package includes the compiled extension and renderer assets.
 
 ## Manual validation scenarios
 

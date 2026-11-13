@@ -66,7 +66,9 @@ ai-dlc-state-tracker/
 ├── tsconfig.json
 ├── src/
 │   ├── extension.ts
+│   ├── markdown-renderer.ts
 │   ├── state-file.ts
+│   ├── state-file-model.ts
 │   └── state-view-provider.ts
 └── test/
     ├── unit/

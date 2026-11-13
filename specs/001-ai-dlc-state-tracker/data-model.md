@@ -15,13 +15,14 @@ The extension reads one workspace state file and derives presentation data in me
 - **Fields**:
   - `uri`: source file URI.
   - `content`: current text read through the VS Code workspace filesystem.
-  - `availability`: one of `loading`, `ready`, `missing`, `empty`, or `error`.
+  - `availability`: one of `loading`, `ready`, `missing`, `empty`, `unavailable`, or `error`.
   - `errorMessage`: optional user-safe explanation for `error`.
 - **State transitions**:
   - View activation or file event → `loading`.
   - Successful non-empty read → `ready`.
   - Successful empty read → `empty`.
   - Not found or deleted → `missing`.
+  - No workspace folder selected → `unavailable`.
   - Any other read failure → `error`.
 - **Validation**: Treat the content as untrusted; do not execute it, interpret it as a command, or write changes back to the file.
 

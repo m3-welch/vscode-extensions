@@ -43,16 +43,16 @@ description: "Task list for AI-DLC State Tracker implementation"
 
 ### Tests for User Story 1
 
-- [X] T006 [P] [US1] Add unit tests for active-editor/first-folder selection and loading, ready, missing, empty, and error state classification in `ai-dlc-state-tracker/src/test/unit/state-file.test.ts`.
+- [X] T006 [P] [US1] Add unit tests for active-editor/first-folder selection and ready, missing, empty, and error state classification in `ai-dlc-state-tracker/src/test/unit/state-file.test.ts`.
 - [X] T007 [P] [US1] Add unit tests verifying standard Markdown rendering, raw HTML exclusion, and the renderer's restrictive resource policy in `ai-dlc-state-tracker/src/test/unit/markdown-renderer.test.ts`.
-- [ ] T008 [US1] Add Extension Development Host tests for contributed view availability and file create/change/delete, missing, and empty behavior in `ai-dlc-state-tracker/test/integration/extension.test.ts`.
+- [X] T008 [US1] Add Extension Development Host tests for contributed view availability and file create/change/delete, missing, and empty behavior in `ai-dlc-state-tracker/src/test/extension.test.ts`.
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] Implement selected workspace-folder resolution, `aidlc-state.md` reads, availability states, and create/change/delete watching through VS Code workspace APIs in `ai-dlc-state-tracker/src/state-file.ts`.
-- [ ] T010 [US1] Implement Markdown rendering with raw HTML disabled and a script-free, restrictive-CSP view template in `ai-dlc-state-tracker/src/state-view-provider.ts`.
-- [ ] T011 [US1] Register the sidebar `WebviewViewProvider`, open/refresh command, and state updates in `ai-dlc-state-tracker/src/extension.ts` and declare the view and command contributions in `ai-dlc-state-tracker/package.json`.
-- [ ] T012 [US1] Verify extension activation and add clear loading, missing, empty, and read-error presentations in `ai-dlc-state-tracker/src/state-view-provider.ts`.
+- [X] T009 [US1] Implement selected workspace-folder resolution, `aidlc-state.md` reads, availability states, and create/change/delete watching through VS Code workspace APIs in `ai-dlc-state-tracker/src/state-file.ts`.
+- [X] T010 [US1] Implement Markdown rendering with raw HTML disabled and a script-free, restrictive-CSP view template in `ai-dlc-state-tracker/src/state-view-provider.ts`.
+- [X] T011 [US1] Register the sidebar `WebviewViewProvider`, open/refresh command, and state updates in `ai-dlc-state-tracker/src/extension.ts` and declare the view and command contributions in `ai-dlc-state-tracker/package.json`.
+- [X] T012 [US1] Verify extension activation and add clear loading, missing, empty, and read-error presentations in `ai-dlc-state-tracker/src/state-view-provider.ts`.
 
 **Checkpoint**: User Story 1 is independently functional and passes its unit and Extension Development Host tests.
 
@@ -68,7 +68,7 @@ description: "Task list for AI-DLC State Tracker implementation"
 
 **Purpose**: Validate the complete MVP and its user-facing documentation.
 
-- [ ] T013 [P] Document extension installation, opening the tracker, and supported workspace behavior in `ai-dlc-state-tracker/README.md`.
+- [X] T013 [P] Document extension installation, opening the tracker, and supported workspace behavior in `ai-dlc-state-tracker/README.md`.
 - [ ] T014 Run the compile, unit tests, Extension Development Host tests, VSIX packaging, and manual scenarios from `specs/001-ai-dlc-state-tracker/quickstart.md`; resolve any implementation regressions in the corresponding `ai-dlc-state-tracker/` files.
 - [ ] T015 Review extension permissions, webview security policy, and workspace-content handling against the constitution in `ai-dlc-state-tracker/src/state-view-provider.ts` and `ai-dlc-state-tracker/package.json`.
 

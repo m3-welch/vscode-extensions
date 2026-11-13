@@ -14,10 +14,19 @@
   "contributes": {
     "commands": [
       {
-        "command": "ai-dlc-state-tracker.helloWorld",
-        "title": "Hello World"
+        "command": "ai-dlc-state-tracker.openTracker",
+        "title": "AI-DLC State Tracker: Open"
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "ai-dlc-state-tracker.stateView",
+          "name": "AI-DLC State Tracker",
+          "type": "webview"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -54,6 +63,8 @@
   },
   "overrides": {
     "diff": "^8.0.4",
-    "serialize-javascript": "^7.0.6"
+    "serialize-javascript": "^7.0.6",
+    "glob": "^14.0.6",
+    "minimatch": "^11.0.8"
   }
 }
