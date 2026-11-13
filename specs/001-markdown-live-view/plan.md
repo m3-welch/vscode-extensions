@@ -1,113 +1,83 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Markdown Live View
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Branch**: `001-markdown-live-view` | **Date**: 2026-11-13 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit-plan` command; its definition describes the execution workflow.
+**Input**: Feature specification from `specs/001-markdown-live-view/spec.md`
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Create a VS Code extension that presents Markdown in a rendered, editable live view while keeping the original Markdown as the canonical document. Use a `CustomTextEditorProvider` backed by CodeMirror 6 in a webview: CodeMirror supplies editing, multi-selection, Markdown syntax parsing, and decoration/widget primitives; the extension host synchronizes edits with the VS Code `TextDocument`. Reveal source for each active caret and selection, render inactive supported ranges, and preserve the source text through view changes and history operations.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+**Language/Version**: TypeScript on the Node.js version supplied by the selected VS Code extension host.
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+**Primary Dependencies**: VS Code Extension API; CodeMirror 6 state, view, commands, and Markdown language packages. Configure the Markdown parser for GFM to cover tables. No external runtime service.
 
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+**Storage**: The VS Code `TextDocument` is canonical and uses normal workspace file persistence. Editor selections and scroll position are transient view state; no separate feature storage.
 
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+**Testing**: Unit tests for source-range mapping, rendering, and document synchronization; VS Code extension-host integration tests using the VS Code extension test harness (`@vscode/test-electron` when scaffolding the extension).
 
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+**Target Platform**: VS Code desktop extension host with a local webview.
 
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: Single VS Code extension, planned under `markdown-live-view/`.
 
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+**Performance Goals**: The specification defines no numeric latency target. Keep selection/render updates responsive on representative long Markdown documents and validate with a large-document fixture.
 
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+**Constraints**: Rendering and parsing remain local; do not rewrite or serialize document text for presentation. Route edits to the canonical `TextDocument`; handle malformed or unsupported syntax as source. CodeMirror decorations/widgets provide the rendered view, not a document replacement.
 
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Scale/Scope**: One Markdown document per editor instance; common Markdown constructs from FR-008, multiple active selections, and a plain-source view of the same document. No sync, backlinks, or plugin ecosystem.
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+| Principle | Gate | Assessment |
+|---|---|---|
+| User-Focused Extensions | Clear workflow and bounded purpose | **Pass** — readable/editable Markdown in VS Code; the spec explicitly excludes unrelated knowledge-base features. |
+| Native VS Code Integration | Documented APIs; respect editor/workspace state | **Pass** — use `CustomTextEditorProvider`, `TextDocument`, commands, and standard document edits; preserve selections and unsaved content during view changes. |
+| Privacy and Security by Default | Least access; untrusted input; no unneeded external data | **Pass** — parse/render locally in the webview, use a restrictive content security policy, and do not load remote resources or send document content externally. |
+| Verifiable Quality | Tests for observable behavior and failure cases | **Pass** — plan unit and extension-host tests for rendering, source preservation, multi-selection, malformed syntax, switching, and undo/redo. |
+| Simplicity and Compatibility | Minimize dependencies and declare supported VS Code range | **Pass with rationale** — use one CodeMirror editor stack because a webview editor is needed for rendered widgets; declare the engine range in the new manifest and avoid unrelated dependencies. |
+
+**Gate result**: Pass. The VS Code decoration API alone cannot provide rich, reflowing replacements in the normal text editor. The custom-editor trade-off is required by the rendered-view requirement; CodeMirror supplies multi-selection and view primitives while the VS Code document remains authoritative. See [research.md](research.md).
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit-plan command output)
-├── research.md          # Phase 0 output (/speckit-plan command)
-├── data-model.md        # Phase 1 output (/speckit-plan command)
-├── quickstart.md        # Phase 1 output (/speckit-plan command)
-├── contracts/           # Phase 1 output (/speckit-plan command)
-└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
+specs/001-markdown-live-view/
+├── plan.md
+├── research.md
+├── data-model.md
+├── contracts/
+│   └── extension-interface.md
+├── quickstart.md
+└── tasks.md             # Generated by /speckit-tasks
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
+markdown-live-view/
+├── package.json
+├── tsconfig.json
 ├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+│   ├── extension.ts
+│   ├── markdown-live-view-provider.ts
+│   ├── document-sync.ts
+│   ├── markdown-renderer.ts
+│   └── webview/
+│       ├── editor.ts
+│       └── styles.css
+└── test/
+    ├── unit/
+    └── integration/
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Keep the extension isolated in `markdown-live-view/`, since the repository currently contains Spec Kit documentation but no extension implementation or shared build/test configuration. Keep extension-host document synchronization separate from webview rendering and editing.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+No constitution violations. The custom editor and CodeMirror dependency are the smallest practical architecture found that can combine rendered widgets with a multi-selection-capable editing surface; native Markdown preview is separate/read-only, and text-editor decorations cannot provide rich reflowing replacements.
