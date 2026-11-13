@@ -69,8 +69,9 @@ description: "Task list for AI-DLC State Tracker implementation"
 **Purpose**: Validate the complete MVP and its user-facing documentation.
 
 - [X] T013 [P] Document extension installation, opening the tracker, and supported workspace behavior in `ai-dlc-state-tracker/README.md`.
-- [ ] T014 Run the compile, unit tests, Extension Development Host tests, VSIX packaging, and manual scenarios from `specs/001-ai-dlc-state-tracker/quickstart.md`; resolve any implementation regressions in the corresponding `ai-dlc-state-tracker/` files.
-- [ ] T015 Review extension permissions, webview security policy, and workspace-content handling against the constitution in `ai-dlc-state-tracker/src/state-view-provider.ts` and `ai-dlc-state-tracker/package.json`.
+- [X] T014 Run compile, unit tests, dependency audit, and VSIX packaging from `specs/001-ai-dlc-state-tracker/quickstart.md`; resolve any implementation regressions in the corresponding `ai-dlc-state-tracker/` files.
+- [X] T015 Review extension permissions, webview security policy, and workspace-content handling against the constitution in `ai-dlc-state-tracker/src/state-view-provider.ts` and `ai-dlc-state-tracker/package.json`.
+- [ ] T016 Run Extension Development Host tests and manually verify view rendering and file updates in `ai-dlc-state-tracker/src/test/extension.test.ts`; VS Code download is currently blocked by unavailable network DNS.
 
 ---
 
@@ -105,8 +106,8 @@ description: "Task list for AI-DLC State Tracker implementation"
 ## Parallel Example: User Story 1
 
 ```text
-Task: T006 — Add state file selection and availability unit tests in ai-dlc-state-tracker/test/unit/state-file.test.ts
-Task: T007 — Add Markdown safety tests in ai-dlc-state-tracker/test/unit/markdown-renderer.test.ts
+Task: T006 — Add state file selection and availability unit tests in ai-dlc-state-tracker/src/test/unit/state-file.test.ts
+Task: T007 — Add Markdown safety tests in ai-dlc-state-tracker/src/test/unit/markdown-renderer.test.ts
 ```
 
 ## Implementation Strategy
@@ -129,3 +130,4 @@ Task: T007 — Add Markdown safety tests in ai-dlc-state-tracker/test/unit/markd
 - Every task uses the required checkbox, sequential ID, optional parallel marker, story label where applicable, and a concrete file path.
 - Workspace Markdown is untrusted: the view must not execute scripts, allow raw HTML, load remote resources, or write to the source file.
 - Tests are required by the repository constitution for the observable behavior and failure cases.
+- Validation note: `npm run test:extension-host` compiled successfully but could not download VS Code from `update.code.visualstudio.com` in this environment; T016 remains pending.
