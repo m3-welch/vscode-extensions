@@ -6,6 +6,17 @@ Markdown Live View is a VS Code extension for reading and editing Markdown in a 
 
 Open a `.md` or `.markdown` document and run **Open Markdown Live View** from the Command Palette. Move the text caret or make a selection to reveal the corresponding Markdown source. Moving the pointer alone does not change source visibility.
 
+To open Markdown files in Live View by default, add this to your VS Code settings:
+
+```json
+"workbench.editorAssociations": {
+  "*.md": "markdownLiveView.editor",
+  "*.markdown": "markdownLiveView.editor"
+}
+```
+
+Alternatively, right-click an editor tab, choose **Reopen Editor With…** > **Markdown Live View**, then pick **Configure default editor for '*.md'**.
+
 Run **Open as Markdown Source** to return to the standard text editor. Both views use the same document. Switching views does not save or discard edits.
 
 The view renders headings, paragraphs, emphasis, links, local images, ordered and unordered lists, block quotes, inline and fenced code, and GitHub-flavored Markdown tables. Unsupported or malformed syntax remains source text. Remote images are not loaded; their alt text is shown instead.
