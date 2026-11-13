@@ -14,8 +14,7 @@
     "skipLibCheck": true,
     "types": [
       "node",
-      "vscode",
-      "mocha"
+      "vscode"
     ]
   },
   "include": [
