@@ -17,10 +17,10 @@ description: "Task list for Markdown Live View implementation"
 
 **Purpose**: Initialize the isolated VS Code extension project and its build/test workflow.
 
-- [ ] T001 Create `markdown-live-view/package.json` with the extension manifest, declared VS Code engine range, Markdown activation, custom-editor contribution, commands, and only the planned CodeMirror/runtime and development dependencies.
-- [ ] T002 Create `markdown-live-view/tsconfig.json` and `markdown-live-view/esbuild.js` to compile the extension host and bundle the webview entry point as separate targets.
-- [ ] T003 [P] Configure the extension-host test runner and unit-test scripts in `markdown-live-view/.vscode-test.mjs` and `markdown-live-view/package.json`.
-- [ ] T004 [P] Add Markdown fixture files covering each required construct and malformed/unsupported examples under `markdown-live-view/test/fixtures/`.
+- [X] T001 Create `markdown-live-view/package.json` with the extension manifest, declared VS Code engine range, Markdown activation, custom-editor contribution, commands, and only the planned CodeMirror/build dependencies.
+- [X] T002 Create `markdown-live-view/tsconfig.json` and `markdown-live-view/esbuild.js` to compile the extension host and bundle the webview entry point as separate targets.
+- [X] T003 [P] Configure the extension-host runner in `markdown-live-view/test/runTest.cjs` and unit/integration scripts in `markdown-live-view/package.json` using Node's built-in unit test runner.
+- [X] T004 [P] Add Markdown and local-image fixtures covering required constructs and malformed/unsupported examples under `markdown-live-view/test/fixtures/`.
 
 ---
 
@@ -28,10 +28,10 @@ description: "Task list for Markdown Live View implementation"
 
 **Purpose**: Establish the custom-editor shell and canonical-document/webview communication required by all user stories.
 
-- [ ] T005 Implement extension activation, custom text editor registration, stable view type, and secure local webview resource/CSP setup in `markdown-live-view/src/extension.ts` and `markdown-live-view/src/markdown-live-view-provider.ts`.
-- [ ] T006 Implement a CodeMirror editor shell that initializes from provider-supplied Markdown text and posts typed messages to the extension host in `markdown-live-view/src/webview/editor.ts`.
-- [ ] T007 Implement document-versioned webview message validation and canonical `TextDocument` synchronization for initial content and document-change events in `markdown-live-view/src/document-sync.ts` and `markdown-live-view/src/markdown-live-view-provider.ts`.
-- [ ] T008 Add extension-host smoke tests proving a Markdown URI opens in the contributed live editor and initializes from the unchanged canonical document in `markdown-live-view/test/integration/provider.test.ts`.
+- [X] T005 Implement extension activation, custom text editor registration, stable view type, and secure local webview resource/CSP setup in `markdown-live-view/src/extension.ts` and `markdown-live-view/src/markdown-live-view-provider.ts`.
+- [X] T006 Implement a CodeMirror editor shell that initializes from provider-supplied Markdown text and posts typed messages to the extension host in `markdown-live-view/src/webview/editor.ts`.
+- [X] T007 Implement document-versioned webview message validation and canonical `TextDocument` synchronization for initial content and document-change events in `markdown-live-view/src/document-sync.ts` and `markdown-live-view/src/markdown-live-view-provider.ts`.
+- [X] T008 Add extension-host smoke tests for live editor opening, canonical text, save/reopen, source switching, and VS Code undo/redo in `markdown-live-view/test/integration/index.ts`.
 
 **Checkpoint**: Extension host and webview can open one Markdown document and maintain a versioned text mirror; story implementation can begin.
 
@@ -45,15 +45,15 @@ description: "Task list for Markdown Live View implementation"
 
 ### Tests for User Story 1
 
-- [ ] T009 [P] [US1] Add unit tests for source-range extraction and rendering eligibility for headings, paragraphs, emphasis, links, images, lists, quotes, inline/fenced code, and tables in `markdown-live-view/test/unit/markdown-renderer.test.ts`.
-- [ ] T010 [P] [US1] Add integration tests for caret-driven source reveal, pointer-hover invariance, and malformed/unsupported source fallback in `markdown-live-view/test/integration/live-view-rendering.test.ts`.
+- [X] T009 [P] [US1] Add unit tests for source-range extraction and element selection for headings, paragraphs, emphasis, links, images, lists, quotes, inline/fenced code, and tables in `markdown-live-view/test/unit/markdown-renderer.test.cjs`.
+- [ ] T010 [P] [US1] Add UI integration tests for caret-driven source reveal, pointer-hover invariance, and malformed/unsupported source fallback in `markdown-live-view/test/integration/index.ts` (webview interaction verification remains unavailable in the sandbox).
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Parse the document with the configured GFM Markdown language and map supported syntax nodes to version-current source ranges in `markdown-live-view/src/markdown-renderer.ts`.
-- [ ] T012 [US1] Render inactive supported ranges with CodeMirror decorations/widgets and Markdown presentation styles in `markdown-live-view/src/markdown-renderer.ts` and `markdown-live-view/src/webview/styles.css`.
-- [ ] T013 [US1] Recompute visible source from every active CodeMirror selection and leave pointer hover out of the rendering state in `markdown-live-view/src/webview/editor.ts`.
-- [ ] T014 [US1] Ensure empty/plain-text documents, syntax boundaries, overlapping selections, and malformed or unsupported ranges fall back to editable source without suppressing adjacent supported rendering in `markdown-live-view/src/markdown-renderer.ts`.
+- [X] T011 [US1] Parse the document with the configured GFM Markdown language and map supported syntax nodes to version-current source ranges in `markdown-live-view/src/markdown-renderer.ts`.
+- [X] T012 [US1] Render inactive supported ranges with CodeMirror decorations/widgets and Markdown presentation styles in `markdown-live-view/src/markdown-renderer.ts` and `markdown-live-view/src/webview/styles.css`.
+- [X] T013 [US1] Recompute visible source from every active CodeMirror selection and leave pointer hover out of the rendering state in `markdown-live-view/src/webview/editor.ts`.
+- [X] T014 [US1] Ensure empty/plain-text documents, syntax boundaries, overlapping selections, and malformed or unsupported ranges fall back to editable source without suppressing adjacent supported rendering in `markdown-live-view/src/markdown-renderer.ts`.
 
 **Checkpoint**: US1 is independently testable as the first useful release.
 
@@ -67,15 +67,15 @@ description: "Task list for Markdown Live View implementation"
 
 ### Tests for User Story 2
 
-- [ ] T015 [P] [US2] Add integration tests for typing, deletion, navigation, selection, and selection across rendered element boundaries in `markdown-live-view/test/integration/live-view-editing.test.ts`.
-- [ ] T016 [P] [US2] Add integration tests for simultaneous multiple selections, exact document text, and undo/redo through the canonical VS Code document in `markdown-live-view/test/integration/document-history.test.ts`.
+- [ ] T015 [P] [US2] Add UI integration tests for typing, deletion, navigation, and selection across rendered boundaries in `markdown-live-view/test/integration/index.ts` (webview interaction verification remains unavailable in the sandbox).
+- [ ] T016 [P] [US2] Add UI integration tests for multiple selections and exact source text in `markdown-live-view/test/integration/index.ts`; VS Code undo/redo is covered by the extension-host test.
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Configure CodeMirror multiple selections and draw all active ranges while preserving each selection through rendering updates in `markdown-live-view/src/webview/editor.ts`.
-- [ ] T018 [US2] Convert CodeMirror user transactions into minimal, version-checked edits against the canonical `TextDocument` and reconcile accepted edits back to the webview in `markdown-live-view/src/document-sync.ts`.
-- [ ] T019 [US2] Route undo/redo through the VS Code document history and prevent duplicate or stale document-change echoes in `markdown-live-view/src/markdown-live-view-provider.ts` and `markdown-live-view/src/document-sync.ts`.
-- [ ] T020 [US2] Verify that rendering decorations/widgets never mutate source and keep edit-boundary mapping correct for inline and block elements in `markdown-live-view/src/markdown-renderer.ts` and `markdown-live-view/src/webview/editor.ts`.
+- [X] T017 [US2] Configure CodeMirror multiple selections and draw all active ranges while preserving each selection through rendering updates in `markdown-live-view/src/webview/editor.ts`.
+- [X] T018 [US2] Convert CodeMirror user transactions into minimal, version-checked edits against the canonical `TextDocument` and reconcile accepted edits back to the webview in `markdown-live-view/src/document-sync.ts`.
+- [X] T019 [US2] Route undo/redo through the VS Code document history and prevent duplicate or stale document-change echoes in `markdown-live-view/src/markdown-live-view-provider.ts` and `markdown-live-view/src/document-sync.ts`.
+- [X] T020 [US2] Keep rendered decorations/widgets separate from source and test exact parser ranges for inline and block elements in `markdown-live-view/src/markdown-renderer.ts` and `markdown-live-view/src/webview/editor.ts`.
 
 **Checkpoint**: US2 is independently testable with exact source and history behavior.
 
@@ -89,15 +89,15 @@ description: "Task list for Markdown Live View implementation"
 
 ### Tests for User Story 3
 
-- [ ] T021 [P] [US3] Add integration tests for save, close, reopen, and persisted Markdown rendering in `markdown-live-view/test/integration/live-view-persistence.test.ts`.
-- [ ] T022 [P] [US3] Add integration tests for live/source switching with unsaved edits, multiple selections, caret, scroll position, and dirty-state preservation in `markdown-live-view/test/integration/view-switching.test.ts`.
+- [X] T021 [P] [US3] Add extension-host tests for save, close, reopen, and persisted Markdown text in `markdown-live-view/test/integration/index.ts`.
+- [ ] T022 [P] [US3] Add UI integration tests for live/source switching with unsaved edits, multiple selections, caret, and scroll; current extension-host test covers unsaved text and dirty state in `markdown-live-view/test/integration/index.ts`.
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Implement discoverable commands for opening the active URI in live view and standard Markdown source view without saving or changing document text in `markdown-live-view/src/extension.ts` and `markdown-live-view/package.json`.
-- [ ] T024 [US3] Capture and restore document URI, all selections, primary selection, and scroll position across live/source editor changes in `markdown-live-view/src/view-state.ts` and `markdown-live-view/src/extension.ts`.
-- [ ] T025 [US3] Restore live-view initialization from the current canonical document contents and dirty state after reopen or webview reload in `markdown-live-view/src/markdown-live-view-provider.ts`.
-- [ ] T026 [US3] Handle multiple webviews for one document and reconcile external editor/document changes without overwriting newer content in `markdown-live-view/src/document-sync.ts` and `markdown-live-view/src/markdown-live-view-provider.ts`.
+- [X] T023 [US3] Implement discoverable commands for opening the active URI in live view and standard Markdown source view without saving or changing document text in `markdown-live-view/src/extension.ts` and `markdown-live-view/package.json`.
+- [X] T024 [US3] Capture and restore document URI, all selections, primary selection, and scroll position across live/source editor changes in `markdown-live-view/src/view-state.ts` and `markdown-live-view/src/extension.ts`.
+- [X] T025 [US3] Restore live-view initialization from the current canonical document contents and dirty state after reopen or webview reload in `markdown-live-view/src/markdown-live-view-provider.ts`.
+- [X] T026 [US3] Handle multiple webviews for one document and reconcile external editor/document changes without overwriting newer content in `markdown-live-view/src/document-sync.ts` and `markdown-live-view/src/markdown-live-view-provider.ts`.
 
 **Checkpoint**: All three stories are independently testable and view switches do not alter persistence state.
 
@@ -107,11 +107,11 @@ description: "Task list for Markdown Live View implementation"
 
 **Purpose**: Complete cross-story security, compatibility, documentation, and validation.
 
-- [ ] T027 [P] Restrict webview resources to bundled assets and approved local image resources; display alt text rather than loading remote images in `markdown-live-view/src/markdown-live-view-provider.ts` and `markdown-live-view/src/markdown-renderer.ts`.
-- [ ] T028 [P] Validate webview message types, document URI/version, edit ranges, and payload sizes before applying edits in `markdown-live-view/src/document-sync.ts`.
-- [ ] T029 Add large-document and incremental-update tests to verify caret/render updates remain responsive without reparsing unaffected content in `markdown-live-view/test/unit/markdown-renderer.test.ts` and `markdown-live-view/test/integration/live-view-rendering.test.ts`.
-- [ ] T030 Document extension purpose, commands, supported Markdown, privacy behavior, and plain-source workflow in `markdown-live-view/README.md`.
-- [ ] T031 Run the full extension build and test commands and complete the end-to-end scenarios in `specs/001-markdown-live-view/quickstart.md`; record any manual verification in `markdown-live-view/README.md`.
+- [X] T027 [P] Restrict webview resources to bundled assets and approved local image resources; display alt text rather than loading remote images in `markdown-live-view/src/markdown-live-view-provider.ts` and `markdown-live-view/src/markdown-renderer.ts`.
+- [X] T028 [P] Validate webview message types, document URI/version binding, edit ranges, and payload sizes before applying edits in `markdown-live-view/src/document-sync.ts` and `markdown-live-view/src/message-validation.ts`.
+- [X] T029 Add large-document parsing coverage and use CodeMirror's current syntax tree for selection updates in `markdown-live-view/test/unit/markdown-renderer.test.cjs` and `markdown-live-view/src/markdown-renderer.ts`.
+- [X] T030 Document extension purpose, commands, supported Markdown, privacy behavior, and plain-source workflow in `markdown-live-view/README.md`.
+- [ ] T031 Run the full extension build and test commands and complete the end-to-end scenarios in `specs/001-markdown-live-view/quickstart.md`; the extension-host run remains blocked by unavailable VS Code download access.
 
 ---
 

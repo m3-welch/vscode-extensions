@@ -39,6 +39,20 @@ test('rejects stale, invalid, overlapping, and oversized edit messages', () => {
       {
         ...valid,
         changes: [
+          { from: 1, to: 1, insert: 'first' },
+          { from: 1, to: 1, insert: 'second' }
+        ]
+      },
+      4,
+      5
+    ),
+    false
+  );
+  assert.equal(
+    isWebviewEditMessage(
+      {
+        ...valid,
+        changes: [
           { from: 0, to: 3, insert: '' },
           { from: 2, to: 4, insert: '' }
         ]
