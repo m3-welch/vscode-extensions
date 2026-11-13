@@ -1,5 +1,6 @@
 import { ChangeSet, EditorSelection, EditorState, Transaction } from '@codemirror/state';
 import { drawSelection, EditorView, keymap } from '@codemirror/view';
+import { rebaseQueuedChanges } from './change-mapping';
 import { createMarkdownRenderingExtension } from '../markdown-renderer';
 import { markdownSupport } from '../markdown-language';
 import { StoredViewState } from '../view-state';
@@ -95,12 +96,10 @@ function applyExternalChanges(message: SyncMessage): void {
     return;
   }
 
-  let remote = ChangeSet.of(message.changes, currentDocumentLength);
-  for (let index = 0; index < queuedChanges.length; index += 1) {
-    const local = queuedChanges[index];
-    queuedChanges[index] = local.map(remote, true);
-    remote = remote.map(local, false);
-  }
+  const remote = rebaseQueuedChanges(
+    ChangeSet.of(message.changes, currentDocumentLength),
+    queuedChanges
+  );
 
   isApplyingRemoteChange = true;
   editor.dispatch({
@@ -233,6 +232,9 @@ window.addEventListener('message', (event: MessageEvent<SyncMessage | Record<str
     const ack = message as { version?: number; transactionId?: string };
     if (Number.isSafeInteger(ack.version) && ack.transactionId === currentTransactionId) {
       currentVersion = ack.version!;
+      if (queuedChanges[0]) {
+        currentDocumentLength = queuedChanges[0].newLength;
+      }
       queuedChanges.shift();
       pendingTransaction = false;
       currentTransactionId = undefined;
