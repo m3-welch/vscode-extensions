@@ -61,3 +61,8 @@ export async function run(): Promise<void> {
 function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
+
+void run().catch((error) => {
+  console.error(error);
+  throw error;
+});

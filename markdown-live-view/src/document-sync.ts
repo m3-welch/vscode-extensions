@@ -89,6 +89,18 @@ export class DocumentSync {
 
     const document = panelState.document;
     if (!isWebviewEditMessage(value, document.version, document.getText().length)) {
+      const message = value as Partial<WebviewEditMessage>;
+      if (
+        isWebviewEditMessage(value, message.baseVersion ?? -1, document.getText().length) &&
+        message.baseVersion !== document.version
+      ) {
+        panelState.panel.webview.postMessage({
+          type: 'reject',
+          transactionId: message.transactionId,
+          version: document.version
+        });
+        return;
+      }
       this.sendDocument(panelState);
       return;
     }
@@ -113,8 +125,17 @@ export class DocumentSync {
 
   private async applyEdit(panelState: WebviewPanelState, message: WebviewEditMessage): Promise<void> {
     const document = panelState.document;
-    if (!isWebviewEditMessage(message, document.version, document.getText().length)) {
-      this.sendDocument(panelState);
+    const value: unknown = message;
+    if (!isWebviewEditMessage(value, document.version, document.getText().length)) {
+      if (message.baseVersion !== document.version) {
+        panelState.panel.webview.postMessage({
+          type: 'reject',
+          transactionId: message.transactionId,
+          version: document.version
+        });
+      } else {
+        this.sendDocument(panelState);
+      }
       return;
     }
 
@@ -125,6 +146,15 @@ export class DocumentSync {
         new vscode.Range(document.positionAt(change.from), document.positionAt(change.to)),
         change.insert
       );
+    }
+
+    if (document.version !== message.baseVersion) {
+      panelState.panel.webview.postMessage({
+        type: 'reject',
+        transactionId: message.transactionId,
+        version: document.version
+      });
+      return;
     }
 
     const transactionKey = document.uri.toString();
@@ -140,7 +170,15 @@ export class DocumentSync {
       if (this.pendingOrigins.get(transactionKey) === pendingOrigin) {
         this.pendingOrigins.delete(transactionKey);
       }
-      this.sendDocument(panelState);
+      if (document.version !== message.baseVersion) {
+        panelState.panel.webview.postMessage({
+          type: 'reject',
+          transactionId: message.transactionId,
+          version: document.version
+        });
+      } else {
+        this.sendDocument(panelState);
+      }
       return;
     }
 
@@ -173,15 +211,31 @@ export class DocumentSync {
       this.pendingOrigins.delete(docKey);
     }
 
+    const changes = event.contentChanges
+      .map(({ rangeOffset, rangeLength, text }) => ({
+        from: rangeOffset,
+        to: rangeOffset + rangeLength,
+        insert: text
+      }))
+      .sort((a, b) => a.from - b.from);
+
     for (const panelState of panels) {
       const isOrigin = isOriginEvent && pendingOrigin.panel === panelState.panel;
       if (!isOrigin) {
-        this.sendDocument(panelState);
+        const viewState = stateViewState.get(panelState.panel);
+        if (viewState) {
+          stateViewState.set(panelState.panel, mapViewState(viewState, changes));
+        }
+        this.sendDocument(panelState, undefined, changes);
       }
     }
   }
 
-  private sendDocument(panelState: WebviewPanelState, viewState?: StoredViewState): void {
+  private sendDocument(
+    panelState: WebviewPanelState,
+    viewState?: StoredViewState,
+    changes?: EditChange[]
+  ): void {
     const document = panelState.document;
     const folder = vscode.workspace.getWorkspaceFolder(document.uri);
     const resourceRoot =
@@ -202,7 +256,8 @@ export class DocumentSync {
       text: document.getText(),
       version: document.version,
       baseUri,
-      viewState: viewState ?? stateViewState.get(panelState.panel)
+      viewState: viewState ?? stateViewState.get(panelState.panel),
+      changes
     });
   }
 
@@ -267,5 +322,34 @@ function parseViewState(value: unknown, documentLength: number): StoredViewState
       Number.isSafeInteger(state.scrollAnchor) && state.scrollAnchor! >= 0
         ? Math.min(state.scrollAnchor!, documentLength)
         : 0
+  };
+}
+
+function mapViewState(
+  viewState: StoredViewState,
+  changes: readonly EditChange[]
+): StoredViewState {
+  const mapPosition = (position: number, association: -1 | 1): number => {
+    let offset = 0;
+    for (const change of changes) {
+      const removed = change.to - change.from;
+      if (position < change.from || (position === change.from && association < 0)) {
+        break;
+      }
+      if (position <= change.to) {
+        return change.from + offset + (association < 0 ? 0 : change.insert.length);
+      }
+      offset += change.insert.length - removed;
+    }
+    return Math.max(0, position + offset);
+  };
+
+  return {
+    ...viewState,
+    selections: viewState.selections.map(({ anchor, head }) => ({
+      anchor: mapPosition(anchor, anchor <= head ? -1 : 1),
+      head: mapPosition(head, anchor <= head ? 1 : -1)
+    })),
+    scrollAnchor: mapPosition(viewState.scrollAnchor ?? 0, -1)
   };
 }

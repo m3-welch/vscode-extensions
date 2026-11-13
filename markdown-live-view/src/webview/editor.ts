@@ -1,4 +1,4 @@
-import { EditorSelection, EditorState, Transaction } from '@codemirror/state';
+import { ChangeSet, EditorSelection, EditorState, Transaction } from '@codemirror/state';
 import { drawSelection, EditorView, keymap } from '@codemirror/view';
 import { createMarkdownRenderingExtension } from '../markdown-renderer';
 import { markdownSupport } from '../markdown-language';
@@ -14,6 +14,7 @@ interface SyncMessage {
   version: number;
   baseUri: string;
   viewState?: StoredViewState;
+  changes?: Array<{ from: number; to: number; insert: string }>;
 }
 
 function requestHistory(action: 'undo' | 'redo'): void {
@@ -34,11 +35,14 @@ const editorContainer: HTMLElement = editorHost;
 let editor: EditorView | undefined;
 let currentVersion = -1;
 let currentBaseUri = '';
+let currentTransactionId: string | undefined;
 let isApplyingRemoteChange = false;
 let transactionCounter = 0;
 let pendingTransaction = false;
 let pendingHistoryAction: 'undo' | 'redo' | undefined;
-const queuedChanges: Array<Array<{ from: number; to: number; insert: string }>> = [];
+const queuedChanges: ChangeSet[] = [];
+let currentDocumentLength = 0;
+let scrollContainer: HTMLElement | undefined;
 
 function sendViewState(): void {
   if (!editor) {
@@ -68,13 +72,47 @@ function sendNextEdit(): void {
   }
 
   pendingTransaction = true;
-  const changes = queuedChanges.shift()!;
+  const changes = queuedChanges[0];
+  currentTransactionId = `cm-${Date.now()}-${transactionCounter++}`;
   vscode.postMessage({
     type: 'edit',
     baseVersion: currentVersion,
-    transactionId: `cm-${Date.now()}-${transactionCounter++}`,
-    changes
+    transactionId: currentTransactionId,
+    changes: changesToArray(changes)
   });
+}
+
+function changesToArray(changes: ChangeSet): Array<{ from: number; to: number; insert: string }> {
+  const result: Array<{ from: number; to: number; insert: string }> = [];
+  changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
+    result.push({ from: fromA, to: toA, insert: inserted.toString() });
+  });
+  return result;
+}
+
+function applyExternalChanges(message: SyncMessage): void {
+  if (!editor || !message.changes) {
+    return;
+  }
+
+  let remote = ChangeSet.of(message.changes, currentDocumentLength);
+  for (let index = 0; index < queuedChanges.length; index += 1) {
+    const local = queuedChanges[index];
+    queuedChanges[index] = local.map(remote, true);
+    remote = remote.map(local, false);
+  }
+
+  isApplyingRemoteChange = true;
+  editor.dispatch({
+    changes: remote,
+    annotations: Transaction.addToHistory.of(false)
+  });
+  isApplyingRemoteChange = false;
+  currentDocumentLength = message.text.length;
+  currentVersion = message.version;
+  currentBaseUri = message.baseUri;
+  sendViewState();
+  sendNextEdit();
 }
 
 function selectionFromViewState(
@@ -95,11 +133,17 @@ function selectionFromViewState(
 }
 
 function initialize(message: SyncMessage): void {
+  if (editor && message.changes) {
+    applyExternalChanges(message);
+    return;
+  }
+
   currentVersion = message.version;
   currentBaseUri = message.baseUri;
   queuedChanges.length = 0;
   pendingTransaction = false;
   pendingHistoryAction = undefined;
+  currentDocumentLength = message.text.length;
 
   if (!editor) {
     editor = new EditorView({
@@ -136,11 +180,7 @@ function initialize(message: SyncMessage): void {
           ]),
           EditorView.updateListener.of((update) => {
             if (update.docChanged && !isApplyingRemoteChange) {
-              const changes: Array<{ from: number; to: number; insert: string }> = [];
-              update.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
-                changes.push({ from: fromA, to: toA, insert: inserted.toString() });
-              });
-              queuedChanges.push(changes);
+              queuedChanges.push(update.changes);
               sendNextEdit();
             }
             if (update.selectionSet) {
@@ -152,6 +192,8 @@ function initialize(message: SyncMessage): void {
       parent: editorContainer
     });
     editor.focus();
+    scrollContainer = editor.scrollDOM;
+    scrollContainer.addEventListener('scroll', sendViewState, { passive: true });
   } else {
     isApplyingRemoteChange = true;
     editor.dispatch({
@@ -188,10 +230,20 @@ window.addEventListener('message', (event: MessageEvent<SyncMessage | Record<str
       initialize(sync);
     }
   } else if (message.type === 'ack') {
-    const ack = message as { version?: number };
-    if (Number.isSafeInteger(ack.version)) {
+    const ack = message as { version?: number; transactionId?: string };
+    if (Number.isSafeInteger(ack.version) && ack.transactionId === currentTransactionId) {
       currentVersion = ack.version!;
+      queuedChanges.shift();
       pendingTransaction = false;
+      currentTransactionId = undefined;
+      sendNextEdit();
+    }
+  } else if (message.type === 'reject') {
+    const rejected = message as { version?: number; transactionId?: string };
+    if (Number.isSafeInteger(rejected.version) && rejected.transactionId === currentTransactionId) {
+      currentVersion = rejected.version!;
+      pendingTransaction = false;
+      currentTransactionId = undefined;
       sendNextEdit();
     }
   } else if (message.type === 'restoreViewState' && editor) {
@@ -209,5 +261,11 @@ window.addEventListener('message', (event: MessageEvent<SyncMessage | Record<str
     }
   }
 });
+
+window.addEventListener(
+  'unload',
+  () => scrollContainer?.removeEventListener('scroll', sendViewState),
+  { once: true }
+);
 
 vscode.postMessage({ type: 'ready' });
