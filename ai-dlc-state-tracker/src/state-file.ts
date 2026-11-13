@@ -8,15 +8,17 @@ export class StateFileMonitor implements vscode.Disposable {
 	private debounceTimer: NodeJS.Timeout | undefined;
 	private generation = 0;
 	private readSequence = 0;
+	private initialized = false;
 
 	constructor(private readonly onChange: (result: StateFileResult) => void) {}
 
 	async watch(folder: vscode.WorkspaceFolder | undefined): Promise<void> {
-		if (this.folder?.uri.toString() === folder?.uri.toString()) {
+		if (this.initialized && this.folder?.uri.toString() === folder?.uri.toString()) {
 			await this.refresh();
 			return;
 		}
 
+		this.initialized = true;
 		this.clearWatcher();
 		this.folder = folder;
 		const generation = ++this.generation;
@@ -58,7 +60,7 @@ export class StateFileMonitor implements vscode.Disposable {
 		const sequence = ++this.readSequence;
 
 		if (!folder) {
-			this.onChange({ kind: 'missing' });
+			this.onChange({ kind: 'unavailable' });
 			return;
 		}
 

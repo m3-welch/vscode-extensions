@@ -19,6 +19,18 @@ suite('AI-DLC State Tracker', () => {
 		await vscode.commands.executeCommand('ai-dlc-state-tracker.openTracker');
 	});
 
+	test('reports an unavailable state when no workspace folder is selected', async () => {
+		const states: StateFileResult[] = [];
+		const monitor = new StateFileMonitor((state) => states.push(state));
+
+		try {
+			await monitor.watch(undefined);
+			assert.ok(states.some((state) => state.kind === 'unavailable'));
+		} finally {
+			monitor.dispose();
+		}
+	});
+
 	test('tracks creation, updates, and deletion of the state file', async () => {
 		const directory = vscode.Uri.file(path.join(os.tmpdir(), `ai-dlc-state-${Date.now()}`));
 		await vscode.workspace.fs.createDirectory(directory);
