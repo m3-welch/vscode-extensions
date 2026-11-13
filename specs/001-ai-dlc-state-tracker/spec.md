@@ -76,6 +76,6 @@ As a user, I can optionally see a compact completed-versus-total progress indica
 ## Assumptions
 
 - “Visible in the” means discoverable by name in VS Code's Extensions view.
-- The tracker operates on a state file in the currently open workspace; selecting among multiple workspace folders is not part of this initial scope.
+- The tracker operates on a state file in the currently open workspace. In a multi-root workspace, it uses the active editor's containing folder, or the first workspace folder if the active editor is not in the workspace or there is no active editor.
 - “Rendered summary” means a readable formatted presentation of the file's Markdown content, not an AI-generated paraphrase or modification of the source file.
 - The status bar indicator is optional and is not required for the initial feature to satisfy its core purpose.

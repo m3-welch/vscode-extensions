@@ -54,7 +54,7 @@ description: "Task list for AI-DLC State Tracker implementation"
 - [X] T011 [US1] Register the sidebar `WebviewViewProvider`, open/refresh command, and state updates in `ai-dlc-state-tracker/src/extension.ts` and declare the view and command contributions in `ai-dlc-state-tracker/package.json`.
 - [X] T012 [US1] Verify extension activation and add clear loading, missing, empty, and read-error presentations in `ai-dlc-state-tracker/src/state-view-provider.ts`.
 
-**Checkpoint**: User Story 1 is independently functional and passes its unit and Extension Development Host tests.
+**Checkpoint (pending Extension Development Host validation)**: User Story 1 is independently functional and passes its unit tests; Extension Development Host tests remain pending as noted in T016.
 
 ---
 

@@ -24,6 +24,7 @@ export class StateFileMonitor implements vscode.Disposable {
 		const generation = ++this.generation;
 
 		if (!folder) {
+			this.readSequence++;
 			this.onChange({ kind: 'unavailable' });
 			return;
 		}
