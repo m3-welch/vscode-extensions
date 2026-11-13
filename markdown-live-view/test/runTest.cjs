@@ -3,7 +3,7 @@ const { runTests } = require('@vscode/test-electron');
 
 async function main() {
   const extensionDevelopmentPath = path.resolve(__dirname, '..');
-  const extensionTestsPath = path.resolve(__dirname, '../out/test/integration');
+  const extensionTestsPath = path.resolve(__dirname, '../out/test/integration/index.js');
 
   await runTests({
     extensionDevelopmentPath,

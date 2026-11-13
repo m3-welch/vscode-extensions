@@ -1,4 +1,6 @@
 const esbuild = require('esbuild');
+const fs = require('node:fs');
+const path = require('node:path');
 
 async function build() {
   await Promise.all([
@@ -28,8 +30,21 @@ async function build() {
       format: 'cjs',
       target: 'node20',
       outfile: 'dist/markdown-renderer.cjs'
+    }),
+    esbuild.build({
+      entryPoints: ['src/message-validation.ts', 'src/view-state.ts'],
+      bundle: true,
+      platform: 'node',
+      format: 'cjs',
+      target: 'node20',
+      outdir: 'dist/unit'
     })
   ]);
+  fs.mkdirSync('dist/webview', { recursive: true });
+  fs.copyFileSync(
+    path.join('src', 'webview', 'styles.css'),
+    path.join('dist', 'webview', 'editor.css')
+  );
 }
 
 build().catch((error) => {

@@ -1,0 +1,95 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  padding: 0;
+  color: var(--vscode-editor-foreground);
+  background: var(--vscode-editor-background);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+}
+
+.cm-editor {
+  min-height: 100vh;
+  outline: none;
+}
+
+.cm-content {
+  padding: 16px 24px;
+}
+
+.cm-line {
+  line-height: 1.55;
+}
+
+.md-live-heading {
+  color: var(--vscode-markdown-header-foreground, var(--vscode-editor-foreground));
+  font-weight: 700;
+  font-size: 1.45em;
+}
+
+.md-live-strong {
+  font-weight: 700;
+}
+
+.md-live-emphasis {
+  font-style: italic;
+}
+
+.md-live-strikethrough {
+  text-decoration: line-through;
+}
+
+.md-live-link {
+  color: var(--vscode-textLink-foreground);
+  text-decoration: underline;
+}
+
+.md-live-inlineCode,
+.md-live-fencedCode {
+  font-family: var(--vscode-editor-font-family);
+  background: var(--vscode-textCodeBlock-background);
+}
+
+.md-live-fencedCode {
+  display: inline-block;
+  width: 100%;
+}
+
+.md-live-blockquote {
+  color: var(--vscode-descriptionForeground);
+  border-left: 3px solid var(--vscode-textBlockQuote-border);
+  padding-left: 0.8em;
+}
+
+.md-live-list {
+  padding-left: 1em;
+}
+
+.md-live-table {
+  font-family: var(--vscode-editor-font-family);
+}
+
+.md-live-table-widget {
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  min-width: 20em;
+}
+
+.md-live-table-widget th,
+.md-live-table-widget td {
+  border: 1px solid var(--vscode-panel-border);
+  padding: 0.25em 0.65em;
+}
+
+.md-live-table-widget th {
+  font-weight: 700;
+}
+
+.md-live-image img {
+  max-width: min(100%, 720px);
+  max-height: 480px;
+  object-fit: contain;
+  vertical-align: middle;
+}

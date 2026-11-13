@@ -1,0 +1,196 @@
+import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
+import { EditorSelection, EditorState, Transaction } from '@codemirror/state';
+import { drawSelection, EditorView, keymap } from '@codemirror/view';
+import { createMarkdownRenderingExtension } from '../markdown-renderer';
+import { StoredViewState } from '../view-state';
+
+declare function acquireVsCodeApi(): {
+  postMessage(message: unknown): void;
+};
+
+interface SyncMessage {
+  type: 'sync';
+  text: string;
+  version: number;
+  baseUri: string;
+  viewState?: StoredViewState;
+}
+
+const vscode = acquireVsCodeApi();
+const editorHost = document.getElementById('editor');
+if (!editorHost) {
+  throw new Error('Editor container was not found.');
+}
+const editorContainer: HTMLElement = editorHost;
+
+let editor: EditorView | undefined;
+let currentVersion = -1;
+let currentBaseUri = '';
+let isApplyingRemoteChange = false;
+let transactionCounter = 0;
+let pendingTransaction = false;
+const queuedChanges: Array<Array<{ from: number; to: number; insert: string }>> = [];
+
+function sendViewState(): void {
+  if (!editor) {
+    return;
+  }
+  vscode.postMessage({
+    type: 'selection',
+    viewState: {
+      selections: editor.state.selection.ranges.map(({ anchor, head }) => ({ anchor, head })),
+      primaryIndex: editor.state.selection.mainIndex,
+      scrollTop: editor.scrollDOM.scrollTop,
+      scrollAnchor: editor.lineBlockAtHeight(editor.scrollDOM.scrollTop).from
+    }
+  });
+}
+
+function sendNextEdit(): void {
+  if (pendingTransaction || queuedChanges.length === 0 || currentVersion < 0 || !editor) {
+    return;
+  }
+
+  pendingTransaction = true;
+  const changes = queuedChanges.shift()!;
+  vscode.postMessage({
+    type: 'edit',
+    baseVersion: currentVersion,
+    transactionId: `cm-${Date.now()}-${transactionCounter++}`,
+    changes
+  });
+}
+
+function selectionFromViewState(
+  viewState: StoredViewState | undefined,
+  documentLength: number
+): EditorSelection {
+  const ranges = viewState?.selections?.length
+    ? viewState.selections.map(({ anchor, head }) => ({
+        anchor: Math.min(Math.max(0, anchor), documentLength),
+        head: Math.min(Math.max(0, head), documentLength)
+      }))
+    : [{ anchor: 0, head: 0 }];
+  const mainIndex = Math.min(Math.max(0, viewState?.primaryIndex ?? 0), ranges.length - 1);
+  return EditorSelection.create(
+    ranges.map(({ anchor, head }) => EditorSelection.range(anchor, head)),
+    mainIndex
+  );
+}
+
+function initialize(message: SyncMessage): void {
+  currentVersion = message.version;
+  currentBaseUri = message.baseUri;
+  queuedChanges.length = 0;
+  pendingTransaction = false;
+
+  if (!editor) {
+    editor = new EditorView({
+      state: EditorState.create({
+        doc: message.text,
+        selection: selectionFromViewState(message.viewState, message.text.length),
+        extensions: [
+          markdown({ base: markdownLanguage }),
+          EditorState.allowMultipleSelections.of(true),
+          drawSelection(),
+          createMarkdownRenderingExtension(currentBaseUri),
+          keymap.of([
+            {
+              key: 'Mod-z',
+              run: () => {
+                vscode.postMessage({ type: 'undo' });
+                return true;
+              }
+            },
+            {
+              key: 'Mod-Shift-z',
+              run: () => {
+                vscode.postMessage({ type: 'redo' });
+                return true;
+              }
+            },
+            {
+              key: 'Mod-y',
+              run: () => {
+                vscode.postMessage({ type: 'redo' });
+                return true;
+              }
+            }
+          ]),
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged && !isApplyingRemoteChange) {
+              const changes: Array<{ from: number; to: number; insert: string }> = [];
+              update.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
+                changes.push({ from: fromA, to: toA, insert: inserted.toString() });
+              });
+              queuedChanges.push(changes);
+              sendNextEdit();
+            }
+            if (update.selectionSet) {
+              sendViewState();
+            }
+          })
+        ]
+      }),
+      parent: editorContainer
+    });
+    editor.focus();
+  } else {
+    isApplyingRemoteChange = true;
+    editor.dispatch({
+      changes: {
+        from: 0,
+        to: editor.state.doc.length,
+        insert: message.text
+      },
+      selection: selectionFromViewState(message.viewState, message.text.length),
+      annotations: Transaction.addToHistory.of(false)
+    });
+    currentBaseUri = message.baseUri;
+    isApplyingRemoteChange = false;
+  }
+
+  editor.scrollDOM.scrollTop = Math.max(0, message.viewState?.scrollTop ?? 0);
+  if (Number.isSafeInteger(message.viewState?.scrollAnchor)) {
+    editor.dispatch({
+      effects: EditorView.scrollIntoView(message.viewState!.scrollAnchor!, { y: 'start' })
+    });
+  }
+  sendViewState();
+}
+
+window.addEventListener('message', (event: MessageEvent<SyncMessage | Record<string, unknown>>) => {
+  const message = event.data;
+  if (!message || typeof message !== 'object') {
+    return;
+  }
+
+  if (message.type === 'sync') {
+    const sync = message as SyncMessage;
+    if (Number.isSafeInteger(sync.version) && typeof sync.text === 'string') {
+      initialize(sync);
+    }
+  } else if (message.type === 'ack') {
+    const ack = message as { version?: number };
+    if (Number.isSafeInteger(ack.version)) {
+      currentVersion = ack.version!;
+      pendingTransaction = false;
+      sendNextEdit();
+    }
+  } else if (message.type === 'restoreViewState' && editor) {
+    const restore = message as { viewState?: StoredViewState };
+    editor.dispatch({
+      selection: selectionFromViewState(restore.viewState, editor.state.doc.length)
+    });
+    if (restore.viewState) {
+      editor.scrollDOM.scrollTop = Math.max(0, restore.viewState.scrollTop);
+      if (Number.isSafeInteger(restore.viewState.scrollAnchor)) {
+        editor.dispatch({
+          effects: EditorView.scrollIntoView(restore.viewState.scrollAnchor!, { y: 'start' })
+        });
+      }
+    }
+  }
+});
+
+vscode.postMessage({ type: 'ready' });
