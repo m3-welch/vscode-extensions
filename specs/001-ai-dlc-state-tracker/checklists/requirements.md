@@ -1,7 +1,7 @@
 # Specification Quality Checklist: AI-DLC State Tracker
 
-**Purpose**: Validate specification completeness and quality before proceeding to planning  
-**Created**: 2026-11-13  
+**Purpose**: Validate specification completeness and quality before proceeding to planning
+**Created**: 2026-11-13
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
