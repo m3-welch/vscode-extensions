@@ -24,7 +24,7 @@
 
 ## Feature Readiness
 
-- [x] All functional requirements have clear acceptance criteria
+- [x] All functional requirements have clear acceptance criteria, including FR-011's offline network-observation scenario and SC-006
 - [x] User scenarios cover primary flows
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification

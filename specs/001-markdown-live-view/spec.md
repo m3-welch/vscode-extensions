@@ -23,6 +23,7 @@ As a person reading a Markdown document, I want its inactive content to appear f
 1. **Given** a Markdown document with supported syntax and the text caret in a heading, **When** the document is shown in the live view, **Then** the heading's Markdown source is visible and other supported inactive content is rendered.
 2. **Given** the same document, **When** the text caret moves from the heading into a paragraph and then a list, **Then** source is revealed at the new caret location and the previously inactive content is rendered again.
 3. **Given** the pointer is over a rendered element while the text caret is elsewhere, **When** the pointer moves across the element, **Then** the revealed source location does not change.
+4. **Given** network access is disabled and the webview is instrumented to record network requests, **When** a document is rendered in the live view, **Then** rendering completes without an outbound request and no document content is transmitted to an external service.
 
 ---
 
@@ -61,7 +62,8 @@ As a person working across sessions or choosing a source-oriented workflow, I wa
 
 - When syntax is unsupported, the affected content remains readable and editable as source; surrounding supported content continues to render.
 - When syntax is malformed or incomplete, the affected text remains visible and editable without losing or rewriting its source; the rest of the document continues to behave normally.
-- When the caret is at a Markdown element boundary, the element containing the caret is treated as active; if no element contains it, the nearest applicable text remains normally editable.
+- For a collapsed caret, Markdown element ranges are half-open: a caret at a shared boundary activates the element that starts at that position, and a caret at the end of the document activates the last element ending there. In a gap, including a blank line, no element is activated and no nearest element is substituted; the gap remains plain editable source.
+- A non-empty selection activates every element whose source range intersects the selection.
 - When a selection spans multiple elements, source for all selected content is visible without changing the selection.
 - When active selections overlap, source is revealed once for the covered text and each selection remains usable.
 - When the document is empty or contains only plain text, the live view remains usable and does not invent Markdown formatting.
@@ -99,6 +101,7 @@ As a person working across sessions or choosing a source-oriented workflow, I wa
 - **SC-003**: Across save/reopen, view-switching, undo, and redo tests, 100% of document content not explicitly changed by the user remains identical to its original or saved Markdown.
 - **SC-004**: In tests containing unsupported or malformed syntax, 100% of the affected source remains visible and recoverable, and unaffected supported content remains usable.
 - **SC-005**: Users can complete reading, editing, saving, reopening, and switching to plain source view without losing a selection or unsaved change as a result of rendering or changing views.
+- **SC-006**: In an offline rendering test with outbound network observation, the document renders with zero external requests and no document content is transmitted outside the editor.
 
 ## Assumptions
 

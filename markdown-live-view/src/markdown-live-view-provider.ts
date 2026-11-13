@@ -36,20 +36,6 @@ export class MarkdownLiveViewProvider implements vscode.CustomTextEditorProvider
       document,
       disposables: []
     };
-    panelState.disposables.push(
-      panel.webview.onDidReceiveMessage((message: unknown) => {
-        if (
-          message &&
-          typeof message === 'object' &&
-          (message as { type?: string }).type === 'selection'
-        ) {
-          const viewState = (message as { viewState?: StoredViewState }).viewState;
-          if (viewState) {
-            this.viewStates.set(document.uri.toString(), viewState);
-          }
-        }
-      })
-    );
     panel.onDidDispose(() => this.rememberState(document.uri, panelState));
     this.sync.attach(panelState, this.viewStates.get(document.uri.toString()));
   }
@@ -69,7 +55,12 @@ export class MarkdownLiveViewProvider implements vscode.CustomTextEditorProvider
         anchor: Math.min(anchor, document.getText().length),
         head: Math.min(head, document.getText().length)
       }));
-      editor.selections = bounded.map(
+      const primaryIndex = Math.min(Math.max(0, state.primaryIndex), bounded.length - 1);
+      const orderedSelections = [
+        bounded[primaryIndex],
+        ...bounded.filter((_, index) => index !== primaryIndex)
+      ];
+      editor.selections = orderedSelections.map(
         ({ anchor, head }) =>
           new vscode.Selection(document.positionAt(anchor), document.positionAt(head))
       );
@@ -88,7 +79,7 @@ export class MarkdownLiveViewProvider implements vscode.CustomTextEditorProvider
   }
 
   currentViewState(uri: vscode.Uri): StoredViewState | undefined {
-    return this.viewStates.get(uri.toString()) ?? this.sync.getViewState(uri);
+    return this.sync.getViewState(uri) ?? this.viewStates.get(uri.toString());
   }
 
   private rememberState(uri: vscode.Uri, panelState: WebviewPanelState): void {

@@ -1,7 +1,7 @@
-import { markdownLanguage } from '@codemirror/lang-markdown';
 import { syntaxTree } from '@codemirror/language';
 import { Decoration, EditorView, ViewPlugin, ViewUpdate, WidgetType } from '@codemirror/view';
-import { Range, RangeSetBuilder } from '@codemirror/state';
+import { Range, RangeSet, RangeSetBuilder } from '@codemirror/state';
+import { markdownSupport } from './markdown-language';
 
 export interface MarkdownElement {
   from: number;
@@ -22,7 +22,7 @@ interface MarkdownAnalysis {
   syntaxRanges: Array<{ from: number; to: number }>;
 }
 
-const parser = markdownLanguage.parser;
+const parser = markdownSupport.language.parser;
 const nodeKinds: Record<string, string> = {
   ATXHeading1: 'heading',
   ATXHeading2: 'heading',
@@ -99,13 +99,17 @@ export function extractMarkdownElements(markdown: string): MarkdownElement[] {
 
 export function isElementActive(
   element: TextSelectionRange,
-  selections: readonly TextSelectionRange[]
+  selections: readonly TextSelectionRange[],
+  documentLength?: number
 ): boolean {
   return selections.some((selection) => {
     if (selection.from === selection.to) {
-      return selection.from >= element.from && selection.from <= element.to;
+      return (
+        (selection.from >= element.from && selection.from < element.to) ||
+        (selection.from === documentLength && element.to === documentLength)
+      );
     }
-    return selection.from <= element.to && selection.to >= element.from;
+    return selection.from < element.to && selection.to > element.from;
   });
 }
 
@@ -250,7 +254,10 @@ function decorationsFor(
 ): Range<Decoration>[] {
   const { elements, syntaxRanges } = analysis;
   const selections = view.state.selection.ranges.map(({ from, to }) => ({ from, to }));
-  const inactiveElements = elements.filter((element) => !isElementActive(element, selections));
+  const documentLength = view.state.doc.length;
+  const inactiveElements = elements.filter(
+    (element) => !isElementActive(element, selections, documentLength)
+  );
   const widgetElements = inactiveElements.filter(
     (element) =>
       element.kind === 'table' || (element.kind === 'image' && Boolean(element.imageSrc))
@@ -265,7 +272,7 @@ function decorationsFor(
   };
 
   for (const element of elements) {
-    if (isElementActive(element, selections)) {
+    if (isElementActive(element, selections, documentLength)) {
       continue;
     }
 
@@ -321,7 +328,7 @@ function decorationsFor(
 export function createMarkdownRenderingExtension(baseUri: string) {
   return ViewPlugin.fromClass(
     class {
-      decorations;
+      decorations: RangeSet<Decoration>;
       analysis: MarkdownAnalysis;
 
       constructor(view: EditorView) {

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'node:path';
-import { isWebviewEditMessage } from './message-validation';
+import { EditChange, isWebviewEditMessage, WebviewEditMessage } from './message-validation';
 import { StoredViewState } from './view-state';
 
 export interface WebviewPanelState {
@@ -11,7 +11,15 @@ export interface WebviewPanelState {
 
 export class DocumentSync {
   private readonly panels = new Map<string, Set<WebviewPanelState>>();
-  private readonly pendingOrigins = new Map<string, { panel: vscode.WebviewPanel; transactionId: string }>();
+  private readonly editQueues = new Map<string, Promise<void>>();
+  private readonly pendingOrigins = new Map<
+    string,
+    {
+      panel: vscode.WebviewPanel;
+      transactionId: string;
+      changes: EditChange[];
+    }
+  >();
 
   constructor(private readonly context: vscode.ExtensionContext) {
     context.subscriptions.push(
@@ -85,8 +93,33 @@ export class DocumentSync {
       return;
     }
 
+    await this.enqueueEdit(panelState, value);
+  }
+
+  private enqueueEdit(panelState: WebviewPanelState, message: WebviewEditMessage): Promise<void> {
+    const key = panelState.document.uri.toString();
+    const previous = this.editQueues.get(key) ?? Promise.resolve();
+    const queued = previous
+      .catch(() => undefined)
+      .then(() => this.applyEdit(panelState, message))
+      .catch(() => this.sendDocument(panelState));
+    this.editQueues.set(key, queued);
+    return queued.finally(() => {
+      if (this.editQueues.get(key) === queued) {
+        this.editQueues.delete(key);
+      }
+    });
+  }
+
+  private async applyEdit(panelState: WebviewPanelState, message: WebviewEditMessage): Promise<void> {
+    const document = panelState.document;
+    if (!isWebviewEditMessage(message, document.version, document.getText().length)) {
+      this.sendDocument(panelState);
+      return;
+    }
+
     const edit = new vscode.WorkspaceEdit();
-    for (const change of value.changes) {
+    for (const change of message.changes) {
       edit.replace(
         document.uri,
         new vscode.Range(document.positionAt(change.from), document.positionAt(change.to)),
@@ -94,24 +127,28 @@ export class DocumentSync {
       );
     }
 
-    const transactionKey = `${document.uri.toString()}:${value.transactionId}`;
-    this.pendingOrigins.set(transactionKey, {
+    const transactionKey = document.uri.toString();
+    const pendingOrigin = {
       panel: panelState.panel,
-      transactionId: value.transactionId
-    });
+      transactionId: message.transactionId,
+      changes: message.changes
+    };
+    this.pendingOrigins.set(transactionKey, pendingOrigin);
 
     const applied = await vscode.workspace.applyEdit(edit);
     if (!applied) {
-      this.pendingOrigins.delete(transactionKey);
+      if (this.pendingOrigins.get(transactionKey) === pendingOrigin) {
+        this.pendingOrigins.delete(transactionKey);
+      }
       this.sendDocument(panelState);
       return;
     }
 
-    if (this.pendingOrigins.has(transactionKey)) {
+    if (this.pendingOrigins.get(transactionKey) === pendingOrigin) {
       this.pendingOrigins.delete(transactionKey);
       panelState.panel.webview.postMessage({
         type: 'ack',
-        transactionId: value.transactionId,
+        transactionId: message.transactionId,
         version: document.version
       });
     }
@@ -124,18 +161,20 @@ export class DocumentSync {
     }
 
     const docKey = event.document.uri.toString();
-    const originEntries = [...this.pendingOrigins.entries()].filter(([key]) => key.startsWith(`${docKey}:`));
-    for (const [key, origin] of originEntries) {
-      origin.panel.webview.postMessage({
+    const pendingOrigin = this.pendingOrigins.get(docKey);
+    const isOriginEvent =
+      pendingOrigin !== undefined && matchesChange(event, pendingOrigin.changes);
+    if (isOriginEvent) {
+      pendingOrigin.panel.webview.postMessage({
         type: 'ack',
-        transactionId: origin.transactionId,
+        transactionId: pendingOrigin.transactionId,
         version: event.document.version
       });
-      this.pendingOrigins.delete(key);
+      this.pendingOrigins.delete(docKey);
     }
 
     for (const panelState of panels) {
-      const isOrigin = originEntries.some(([, origin]) => origin.panel === panelState.panel);
+      const isOrigin = isOriginEvent && pendingOrigin.panel === panelState.panel;
       if (!isOrigin) {
         this.sendDocument(panelState);
       }
@@ -176,6 +215,19 @@ export class DocumentSync {
     }
     panelState.disposables.forEach((disposable) => disposable.dispose());
   }
+}
+
+function matchesChange(
+  event: vscode.TextDocumentChangeEvent,
+  changes: readonly EditChange[]
+): boolean {
+  const expected = changes
+    .map(({ from, to, insert }) => `${from}:${to - from}:${insert}`)
+    .sort();
+  const actual = event.contentChanges
+    .map(({ rangeOffset, rangeLength, text }) => `${rangeOffset}:${rangeLength}:${text}`)
+    .sort();
+  return expected.length === actual.length && expected.every((change, index) => change === actual[index]);
 }
 
 const stateViewState = new WeakMap<vscode.WebviewPanel, StoredViewState>();

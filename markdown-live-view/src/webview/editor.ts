@@ -1,7 +1,7 @@
-import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { EditorSelection, EditorState, Transaction } from '@codemirror/state';
 import { drawSelection, EditorView, keymap } from '@codemirror/view';
 import { createMarkdownRenderingExtension } from '../markdown-renderer';
+import { markdownSupport } from '../markdown-language';
 import { StoredViewState } from '../view-state';
 
 declare function acquireVsCodeApi(): {
@@ -107,7 +107,7 @@ function initialize(message: SyncMessage): void {
         doc: message.text,
         selection: selectionFromViewState(message.viewState, message.text.length),
         extensions: [
-          markdown({ base: markdownLanguage }),
+          markdownSupport,
           EditorState.allowMultipleSelections.of(true),
           drawSelection(),
           createMarkdownRenderingExtension(currentBaseUri),

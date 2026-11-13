@@ -57,13 +57,19 @@ test('extracts all required supported Markdown element kinds and exact ranges', 
 
 test('marks all selected or caret-containing elements active, including boundaries', () => {
   const element = { from: 4, to: 10, kind: 'heading' };
+  const nextElement = { from: 10, to: 15, kind: 'paragraph' };
+  const gapElement = { from: 12, to: 15, kind: 'paragraph' };
 
   assert.equal(isElementActive(element, [{ from: 4, to: 4 }]), true);
-  assert.equal(isElementActive(element, [{ from: 10, to: 10 }]), true);
+  assert.equal(isElementActive(element, [{ from: 10, to: 10 }]), false);
+  assert.equal(isElementActive(nextElement, [{ from: 10, to: 10 }]), true);
+  assert.equal(isElementActive(element, [{ from: 10, to: 10 }], 10), true);
   assert.equal(isElementActive(element, [{ from: 7, to: 7 }]), true);
+  assert.equal(isElementActive(gapElement, [{ from: 11, to: 11 }]), false);
   assert.equal(isElementActive(element, [{ from: 2, to: 5 }]), true);
-  assert.equal(isElementActive(element, [{ from: 10, to: 12 }]), true);
+  assert.equal(isElementActive(element, [{ from: 10, to: 12 }]), false);
   assert.equal(isElementActive(element, [{ from: 1, to: 3 }]), false);
+  assert.equal(isElementActive(element, [{ from: 11, to: 11 }]), false);
 });
 
 test('leaves empty and plain-text content without invented elements', () => {

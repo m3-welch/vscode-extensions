@@ -140,8 +140,8 @@ description: "Task list for Markdown Live View implementation"
 ## Parallel Example: User Story 1
 
 ```text
-Task: T009 — Add Markdown source-range and rendering eligibility unit tests in markdown-live-view/test/unit/markdown-renderer.test.ts
-Task: T010 — Add caret, pointer, and fallback integration tests in markdown-live-view/test/integration/live-view-rendering.test.ts
+Task: T009 — Add Markdown source-range and rendering eligibility unit tests in markdown-live-view/test/unit/markdown-renderer.test.cjs
+Task: T010 — Add caret, pointer, and fallback integration tests in markdown-live-view/test/integration/index.ts
 ```
 
 ## Implementation Strategy
