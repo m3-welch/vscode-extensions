@@ -1,12 +1,3 @@
-<!--
-Sync Impact Report
-Version change: unratified template → 1.0.0
-Modified principles: none; initial constitution
-Added sections: Additional Constraints; Development Workflow; Governance rules
-Removed sections: none
-Follow-up TODOs: none
--->
-
 # vscode-extensions Constitution
 
 ## Core Principles
