@@ -3,7 +3,7 @@ A collection of VS Code extensions for personal use
 
 ## Extensions
 
-- [Markdown Live View](extensions/super-markdown-live-view/README.md) — edit Markdown with a local rendered live view.
+- [Super Markdown Live View](extensions/super-markdown-live-view/README.md) — edit Markdown with a local rendered live view.
 
 ## Publishing
 

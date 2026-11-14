@@ -1,6 +1,6 @@
 {
   "name": "super-markdown-live-view",
-  "displayName": "Markdown Live View",
+  "displayName": "Super Markdown Live View",
   "description": "Edit Markdown with an inline rendered live view.",
   "version": "0.0.1",
   "publisher": "m3-welch",
@@ -13,25 +13,25 @@
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
-    "onCustomEditor:markdownLiveView.editor",
-    "onCommand:markdownLiveView.openLive",
-    "onCommand:markdownLiveView.openSource"
+    "onCustomEditor:superMarkdownLiveView.editor",
+    "onCommand:superMarkdownLiveView.openLive",
+    "onCommand:superMarkdownLiveView.openSource"
   ],
   "contributes": {
     "commands": [
       {
-        "command": "markdownLiveView.openLive",
-        "title": "Open Markdown Live View"
+        "command": "superMarkdownLiveView.openLive",
+        "title": "Open Super Markdown Live View"
       },
       {
-        "command": "markdownLiveView.openSource",
+        "command": "superMarkdownLiveView.openSource",
         "title": "Open as Markdown Source"
       }
     ],
     "customEditors": [
       {
-        "viewType": "markdownLiveView.editor",
-        "displayName": "Markdown Live View",
+        "viewType": "superMarkdownLiveView.editor",
+        "displayName": "Super Markdown Live View",
         "selector": [
           {
             "filenamePattern": "**/*.md"

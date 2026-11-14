@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Markdown Live View
+# Specification Quality Checklist: Super Markdown Live View
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-11-13

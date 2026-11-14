@@ -1,9 +1,9 @@
 ---
 
-description: "Task list for Markdown Live View implementation"
+description: "Task list for Super Markdown Live View implementation"
 ---
 
-# Tasks: Markdown Live View
+# Tasks: Super Markdown Live View
 
 **Input**: Design documents from `specs/001-super-markdown-live-view/`
 

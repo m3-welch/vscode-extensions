@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import { MarkdownLiveViewProvider } from './super-markdown-live-view-provider';
+import { SuperMarkdownLiveViewProvider } from './super-markdown-live-view-provider';
 import { StoredViewState } from './view-state';
 
 export function activate(context: vscode.ExtensionContext): void {
-  const provider = new MarkdownLiveViewProvider(context);
+  const provider = new SuperMarkdownLiveViewProvider(context);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('markdownLiveView.openLive', async () => {
+    vscode.commands.registerCommand('superMarkdownLiveView.openLive', async () => {
       const uri = getActiveMarkdownUri();
       if (!uri) {
         void vscode.window.showInformationMessage('Open a Markdown document first.');
@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext): void {
           : provider.currentViewState(uri);
       await provider.openLive(uri, state);
     }),
-    vscode.commands.registerCommand('markdownLiveView.openSource', async () => {
+    vscode.commands.registerCommand('superMarkdownLiveView.openSource', async () => {
       const uri = getActiveMarkdownUri();
       if (!uri) {
         void vscode.window.showInformationMessage('Open a Markdown document first.');

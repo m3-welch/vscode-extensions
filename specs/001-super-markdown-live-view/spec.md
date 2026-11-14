@@ -1,4 +1,4 @@
-# Feature Specification: Markdown Live View
+# Feature Specification: Super Markdown Live View
 
 **Feature Branch**: `copilot/add-super-markdown-live-view-feature`
 
@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "New extension: Markdown Live View. I want a vscode extension that behaves in a similar way to obsidian where the markdown is rendered until the cursor goes over an element where it then shows the markdown that powers the view."
+**Input**: User description: "New extension: Super Markdown Live View. I want a vscode extension that behaves in a similar way to obsidian where the markdown is rendered until the cursor goes over an element where it then shows the markdown that powers the view."
 
 ## User Scenarios & Testing *(mandatory)*
 
