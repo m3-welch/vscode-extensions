@@ -7,8 +7,8 @@ on:
         description: 'Publish all extensions'
         type: boolean
         default: false
-      markdown-live-view:
-        description: 'markdown-live-view'
+      super-markdown-live-view:
+        description: 'super-markdown-live-view'
         type: boolean
         default: false
 

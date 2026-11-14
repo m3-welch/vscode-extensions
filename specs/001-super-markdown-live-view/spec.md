@@ -1,6 +1,6 @@
 # Feature Specification: Markdown Live View
 
-**Feature Branch**: `copilot/add-markdown-live-view-feature`
+**Feature Branch**: `copilot/add-super-markdown-live-view-feature`
 
 **Created**: 2026-11-13
 

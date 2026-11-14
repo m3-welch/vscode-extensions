@@ -2,10 +2,10 @@ import * as assert from 'node:assert/strict';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import { MARKDOWN_LIVE_VIEW_TYPE } from '../../src/markdown-live-view-provider';
+import { MARKDOWN_LIVE_VIEW_TYPE } from '../../src/super-markdown-live-view-provider';
 
 export async function run(): Promise<void> {
-  const extension = vscode.extensions.getExtension('m3-welch.markdown-live-view');
+  const extension = vscode.extensions.getExtension('m3-welch.super-markdown-live-view');
   assert.ok(extension, 'extension is registered');
   await extension.activate();
 
@@ -13,7 +13,7 @@ export async function run(): Promise<void> {
   assert.ok(commands.includes('markdownLiveView.openLive'));
   assert.ok(commands.includes('markdownLiveView.openSource'));
 
-  const uri = vscode.Uri.file(path.join(os.tmpdir(), `markdown-live-view-${Date.now()}.md`));
+  const uri = vscode.Uri.file(path.join(os.tmpdir(), `super-markdown-live-view-${Date.now()}.md`));
   const content = '# Smoke test\n\nOriginal Markdown stays canonical.\n';
   await vscode.workspace.fs.writeFile(uri, Buffer.from(content));
   try {

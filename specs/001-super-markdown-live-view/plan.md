@@ -1,8 +1,8 @@
 # Implementation Plan: Markdown Live View
 
-**Branch**: `001-markdown-live-view` | **Date**: 2026-11-13 | **Spec**: [spec.md](spec.md)
+**Branch**: `001-super-markdown-live-view` | **Date**: 2026-11-13 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/001-markdown-live-view/spec.md`
+**Input**: Feature specification from `specs/001-super-markdown-live-view/spec.md`
 
 ## Summary
 
@@ -20,7 +20,7 @@ Create a VS Code extension that presents Markdown in a rendered, editable live v
 
 **Target Platform**: VS Code desktop extension host with a local webview.
 
-**Project Type**: Single VS Code extension, planned under `extensions/markdown-live-view/`.
+**Project Type**: Single VS Code extension, planned under `extensions/super-markdown-live-view/`.
 
 **Performance Goals**: The specification defines no numeric latency target. Keep selection/render updates responsive on representative long Markdown documents and validate with a large-document fixture.
 
@@ -47,7 +47,7 @@ Create a VS Code extension that presents Markdown in a rendered, editable live v
 ### Documentation (this feature)
 
 ```text
-specs/001-markdown-live-view/
+specs/001-super-markdown-live-view/
 ├── plan.md
 ├── research.md
 ├── data-model.md
@@ -60,12 +60,12 @@ specs/001-markdown-live-view/
 ### Source Code (repository root)
 
 ```text
-extensions/markdown-live-view/
+extensions/super-markdown-live-view/
 ├── package.json
 ├── tsconfig.json
 ├── src/
 │   ├── extension.ts
-│   ├── markdown-live-view-provider.ts
+│   ├── super-markdown-live-view-provider.ts
 │   ├── document-sync.ts
 │   ├── markdown-renderer.ts
 │   └── webview/
@@ -76,7 +76,7 @@ extensions/markdown-live-view/
     └── integration/
 ```
 
-**Structure Decision**: Keep the extension isolated in `extensions/markdown-live-view/`, since the repository currently contains Spec Kit documentation but no extension implementation or shared build/test configuration. Keep extension-host document synchronization separate from webview rendering and editing.
+**Structure Decision**: Keep the extension isolated in `extensions/super-markdown-live-view/`, since the repository currently contains Spec Kit documentation but no extension implementation or shared build/test configuration. Keep extension-host document synchronization separate from webview rendering and editing.
 
 ## Complexity Tracking
 
