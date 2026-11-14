@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { listExtensions, selectExtensions } from './select-extensions.mjs';
+import { listExtensions, selectExtensions, syncWorkflow } from './select-extensions.mjs';
 
 test('discovers extension package directories dynamically', async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'extensions-'));
@@ -18,21 +18,25 @@ test('discovers extension package directories dynamically', async (t) => {
 });
 
 test('selects all discovered extensions', () => {
-  assert.deepEqual(selectExtensions('all', ['alpha', 'zeta']), ['alpha', 'zeta']);
+  assert.deepEqual(selectExtensions({ all: true, alpha: false }, ['alpha', 'zeta']), ['alpha', 'zeta']);
 });
 
-test('selects and trims comma-separated extensions without duplicates', () => {
-  assert.deepEqual(selectExtensions(' zeta, alpha, zeta ', ['alpha', 'zeta']), ['zeta', 'alpha']);
-});
-
-test('rejects extension names outside the discovered list', () => {
-  assert.throws(
-    () => selectExtensions('missing', ['alpha']),
-    /Unknown extension\(s\): missing\. Available extensions: alpha\./,
+test('selects checked extensions in discovery order', () => {
+  assert.deepEqual(
+    selectExtensions({ all: false, zeta: 'true', alpha: true, beta: false }, ['alpha', 'beta', 'zeta']),
+    ['alpha', 'zeta'],
   );
 });
 
 test('rejects empty selections and an empty extension list', () => {
-  assert.throws(() => selectExtensions('alpha,,zeta', ['alpha', 'zeta']), /Provide one or more/);
-  assert.throws(() => selectExtensions('all', []), /No extension packages/);
+  assert.throws(() => selectExtensions({ all: false, alpha: false }, ['alpha']), /Select at least one/);
+  assert.throws(() => selectExtensions({ all: true }, []), /No extension packages/);
+});
+
+test('generates workflow inputs between markers', () => {
+  const workflow = 'a\n      # BEGIN GENERATED EXTENSION INPUTS\n      old: 1\n      # END GENERATED EXTENSION INPUTS\nb\n';
+  const updated = syncWorkflow(workflow, ['alpha']);
+  assert.match(updated, /      alpha:\n        description: 'alpha'\n        type: boolean/);
+  assert.doesNotMatch(updated, /old: 1/);
+  assert.equal(syncWorkflow(updated, ['alpha']), updated);
 });

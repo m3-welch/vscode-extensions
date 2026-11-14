@@ -3,11 +3,17 @@ name: Publish extensions
 on:
   workflow_dispatch:
     inputs:
-      extensions:
-        description: 'Comma-separated extension directory names, or "all". Names are discovered from extensions/.'
-        required: true
-        default: all
-        type: string
+      # Regenerate with: node .github/scripts/select-extensions.mjs --sync-workflow
+      # BEGIN GENERATED EXTENSION INPUTS
+      all:
+        description: 'Publish all extensions'
+        type: boolean
+        default: false
+      markdown-live-view:
+        description: 'markdown-live-view'
+        type: boolean
+        default: false
+      # END GENERATED EXTENSION INPUTS
 
 permissions:
   contents: read
@@ -27,15 +33,16 @@ jobs:
       - name: Resolve extension selection
         id: selection
         env:
-          EXTENSIONS_INPUT: ${{ inputs.extensions }}
+          INPUTS_JSON: ${{ toJSON(inputs) }}
         run: |
+          node .github/scripts/select-extensions.mjs --check-workflow
           available="$(node .github/scripts/select-extensions.mjs --list)"
           {
             echo '### Available extensions'
             echo
             node -e 'JSON.parse(process.argv[1]).forEach((name) => console.log(`- \`${name}\``))' "$available"
           } >> "$GITHUB_STEP_SUMMARY"
-          selection="$(node .github/scripts/select-extensions.mjs "$EXTENSIONS_INPUT")"
+          selection="$(node .github/scripts/select-extensions.mjs "$INPUTS_JSON")"
           echo "extensions=$selection" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies and compile

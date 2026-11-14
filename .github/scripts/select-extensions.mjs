@@ -1,4 +1,4 @@
-import { access, readdir } from 'node:fs/promises';
+import { access, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,28 +24,54 @@ export async function listExtensions(extensionsRoot) {
   return extensions.sort();
 }
 
-export function selectExtensions(input, available) {
-  const selection = input.trim();
-  if (selection === 'all') {
+export function selectExtensions(inputs, available) {
+  const selected = available.filter((name) => inputs[name] === true || inputs[name] === 'true');
+  const all = inputs.all === true || inputs.all === 'true';
+
+  if (all) {
     if (available.length === 0) {
       throw new Error('No extension packages were found in extensions/.');
     }
     return [...available];
   }
 
-  const selected = selection.split(',').map((name) => name.trim());
-  if (selected.some((name) => name.length === 0)) {
-    throw new Error('Provide one or more extension directory names, or "all".');
+  if (selected.length === 0) {
+    throw new Error('Select at least one extension, or select "all".');
   }
 
-  const unknown = selected.filter((name) => !available.includes(name));
-  if (unknown.length > 0) {
-    throw new Error(
-      `Unknown extension(s): ${unknown.join(', ')}. Available extensions: ${available.join(', ') || '(none)'}.`,
+  return selected;
+}
+
+const START_MARKER = '# BEGIN GENERATED EXTENSION INPUTS';
+const END_MARKER = '# END GENERATED EXTENSION INPUTS';
+
+export function renderInputs(available, indent = '      ') {
+  const lines = [
+    `${indent}all:`,
+    `${indent}  description: 'Publish all extensions'`,
+    `${indent}  type: boolean`,
+    `${indent}  default: false`,
+  ];
+  for (const name of available) {
+    lines.push(
+      `${indent}${name}:`,
+      `${indent}  description: '${name}'`,
+      `${indent}  type: boolean`,
+      `${indent}  default: false`,
     );
   }
+  return lines.join('\n');
+}
 
-  return [...new Set(selected)];
+export function syncWorkflow(workflow, available) {
+  const start = workflow.indexOf(START_MARKER);
+  const end = workflow.indexOf(END_MARKER);
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error('Workflow is missing the generated extension inputs markers.');
+  }
+  const startLineEnd = workflow.indexOf('\n', start) + 1;
+  const endLineStart = workflow.lastIndexOf('\n', end) + 1;
+  return `${workflow.slice(0, startLineEnd)}${renderInputs(available)}\n${workflow.slice(endLineStart)}`;
 }
 
 async function main() {
@@ -58,11 +84,25 @@ async function main() {
     return;
   }
 
-  if (argument === undefined) {
-    throw new Error('Pass "all" or a comma-separated list of extension directory names.');
+  if (argument === '--sync-workflow' || argument === '--check-workflow') {
+    const workflowPath = fileURLToPath(new URL('../workflows/publish-extensions.yml', import.meta.url));
+    const current = await readFile(workflowPath, 'utf8');
+    const updated = syncWorkflow(current, available);
+    if (argument === '--check-workflow') {
+      if (updated !== current) {
+        throw new Error('publish-extensions.yml inputs are out of date. Run: node .github/scripts/select-extensions.mjs --sync-workflow');
+      }
+    } else {
+      await writeFile(workflowPath, updated);
+    }
+    return;
   }
 
-  console.log(JSON.stringify(selectExtensions(argument, available)));
+  if (argument === undefined) {
+    throw new Error('Pass the workflow inputs as JSON, --list, --sync-workflow, or --check-workflow.');
+  }
+
+  console.log(JSON.stringify(selectExtensions(JSON.parse(argument), available)));
 }
 
 if (path.resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
