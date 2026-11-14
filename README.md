@@ -1,6 +1,11 @@
 # vscode-extensions
 A collection of VS Code extensions for personal use
 
+## Extensions
+
+- [AI-DLC State Tracker](ai-dlc-state-tracker/README.md): view the workspace's
+  `aidlc-state.md` as rendered Markdown in VS Code.
+
 ## Spec Kit
 
 This repository uses [GitHub Spec Kit](https://github.com/github/spec-kit) with
