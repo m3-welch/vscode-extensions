@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
@@ -54,13 +55,8 @@ jobs:
       - name: Publish selected extensions
         env:
           SELECTION: ${{ steps.selection.outputs.extensions }}
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          if [[ -z "$VSCE_PAT" ]]; then
-            echo 'Set the VSCE_PAT repository secret to publish extensions.' >&2
-            exit 1
-          fi
           mapfile -t extensions < <(node -e 'JSON.parse(process.argv[1]).forEach((name) => console.log(name))' "$SELECTION")
           for extension in "${extensions[@]}"; do
-            vsce publish --pat "$VSCE_PAT" --packagePath "$RUNNER_TEMP/$extension.vsix"
+            vsce publish --oidc --packagePath "$RUNNER_TEMP/$extension.vsix"
           done
