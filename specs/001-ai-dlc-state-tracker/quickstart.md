@@ -10,7 +10,7 @@ This guide describes validation scenarios for the extension package after implem
 
 ## Build and automated tests
 
-From `ai-dlc-state-tracker/`:
+From `extensions/ai-dlc-state-tracker/`:
 
 1. Install the package dependencies with `npm install`.
 2. Run `npm run compile` for type checking, linting, and bundle generation.

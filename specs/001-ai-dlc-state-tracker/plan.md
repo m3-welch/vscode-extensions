@@ -6,7 +6,7 @@
 
 ## Summary
 
-Create a standalone VS Code extension in `ai-dlc-state-tracker/` that contributes a discoverable sidebar view and renders the current workspace's `aidlc-state.md` as formatted Markdown. Use a `WebviewViewProvider` with content read from the VS Code workspace filesystem, a file watcher for create/change/delete events, and Markdown rendering configured to treat workspace content as untrusted. The required MVP will not include the optional status-bar progress indicator.
+Create a standalone VS Code extension in `extensions/ai-dlc-state-tracker/` that contributes a discoverable sidebar view and renders the current workspace's `aidlc-state.md` as formatted Markdown. Use a `WebviewViewProvider` with content read from the VS Code workspace filesystem, a file watcher for create/change/delete events, and Markdown rendering configured to treat workspace content as untrusted. The required MVP will not include the optional status-bar progress indicator.
 
 ## Technical Context
 
@@ -60,7 +60,7 @@ No `contracts/` directory is needed: the feature exposes no external service or 
 ### Source Code (repository root)
 
 ```text
-ai-dlc-state-tracker/
+extensions/ai-dlc-state-tracker/
 ├── package.json
 ├── README.md
 ├── tsconfig.json

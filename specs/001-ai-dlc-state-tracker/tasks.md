@@ -18,8 +18,8 @@ description: "Task list for AI-DLC State Tracker implementation"
 
 **Purpose**: Scaffold the standalone VS Code extension package.
 
-- [X] T001 Run the official Yeoman VS Code extension generator in `ai-dlc-state-tracker/` and create the initial TypeScript extension manifest at `ai-dlc-state-tracker/package.json` with Extension Development Host test support.
-- [X] T002 [P] Set the extension display name, identifier, description, VS Code engine range, and publisher metadata in `ai-dlc-state-tracker/package.json`.
+- [X] T001 Run the official Yeoman VS Code extension generator in `extensions/ai-dlc-state-tracker/` and create the initial TypeScript extension manifest at `extensions/ai-dlc-state-tracker/package.json` with Extension Development Host test support.
+- [X] T002 [P] Set the extension display name, identifier, description, VS Code engine range, and publisher metadata in `extensions/ai-dlc-state-tracker/package.json`.
 - [X] T003 [P] Add the extension directory and its purpose to the repository overview in `README.md`.
 
 ---
@@ -28,8 +28,8 @@ description: "Task list for AI-DLC State Tracker implementation"
 
 **Purpose**: Establish secure rendering and a testable package baseline shared by the required view behavior.
 
-- [X] T004 Configure compile, unit-test, Extension Development Host test, and VSIX packaging scripts in `ai-dlc-state-tracker/package.json`, preserving the generated toolchain.
-- [X] T005 Review the current Markdown-It dependency version with the dependency advisory database, then add Markdown-It and its TypeScript types if needed and configure bundling in `ai-dlc-state-tracker/package.json` and `ai-dlc-state-tracker/tsconfig.json`.
+- [X] T004 Configure compile, unit-test, Extension Development Host test, and VSIX packaging scripts in `extensions/ai-dlc-state-tracker/package.json`, preserving the generated toolchain.
+- [X] T005 Review the current Markdown-It dependency version with the dependency advisory database, then add Markdown-It and its TypeScript types if needed and configure bundling in `extensions/ai-dlc-state-tracker/package.json` and `extensions/ai-dlc-state-tracker/tsconfig.json`.
 
 **Checkpoint**: Extension scaffolding, scripts, and renderer dependency are ready for the independently testable primary story.
 
@@ -43,16 +43,16 @@ description: "Task list for AI-DLC State Tracker implementation"
 
 ### Tests for User Story 1
 
-- [X] T006 [P] [US1] Add unit tests for active-editor/first-folder selection and ready, missing, empty, and error state classification in `ai-dlc-state-tracker/src/test/unit/state-file.test.ts`.
-- [X] T007 [P] [US1] Add unit tests verifying standard Markdown rendering, raw HTML exclusion, and the renderer's restrictive resource policy in `ai-dlc-state-tracker/src/test/unit/markdown-renderer.test.ts`.
-- [X] T008 [US1] Add Extension Development Host tests for contributed view availability and file create/change/delete, missing, and empty behavior in `ai-dlc-state-tracker/src/test/extension.test.ts`.
+- [X] T006 [P] [US1] Add unit tests for active-editor/first-folder selection and ready, missing, empty, and error state classification in `extensions/ai-dlc-state-tracker/src/test/unit/state-file.test.ts`.
+- [X] T007 [P] [US1] Add unit tests verifying standard Markdown rendering, raw HTML exclusion, and the renderer's restrictive resource policy in `extensions/ai-dlc-state-tracker/src/test/unit/markdown-renderer.test.ts`.
+- [X] T008 [US1] Add Extension Development Host tests for contributed view availability and file create/change/delete, missing, and empty behavior in `extensions/ai-dlc-state-tracker/src/test/extension.test.ts`.
 
 ### Implementation for User Story 1
 
-- [X] T009 [US1] Implement selected workspace-folder resolution, `aidlc-state.md` reads, availability states, and create/change/delete watching through VS Code workspace APIs in `ai-dlc-state-tracker/src/state-file.ts`.
-- [X] T010 [US1] Implement Markdown rendering with raw HTML disabled and a script-free, restrictive-CSP view template in `ai-dlc-state-tracker/src/state-view-provider.ts`.
-- [X] T011 [US1] Register the sidebar `WebviewViewProvider`, open/refresh command, and state updates in `ai-dlc-state-tracker/src/extension.ts` and declare the view and command contributions in `ai-dlc-state-tracker/package.json`.
-- [X] T012 [US1] Verify extension activation and add clear loading, missing, empty, and read-error presentations in `ai-dlc-state-tracker/src/state-view-provider.ts`.
+- [X] T009 [US1] Implement selected workspace-folder resolution, `aidlc-state.md` reads, availability states, and create/change/delete watching through VS Code workspace APIs in `extensions/ai-dlc-state-tracker/src/state-file.ts`.
+- [X] T010 [US1] Implement Markdown rendering with raw HTML disabled and a script-free, restrictive-CSP view template in `extensions/ai-dlc-state-tracker/src/state-view-provider.ts`.
+- [X] T011 [US1] Register the sidebar `WebviewViewProvider`, open/refresh command, and state updates in `extensions/ai-dlc-state-tracker/src/extension.ts` and declare the view and command contributions in `extensions/ai-dlc-state-tracker/package.json`.
+- [X] T012 [US1] Verify extension activation and add clear loading, missing, empty, and read-error presentations in `extensions/ai-dlc-state-tracker/src/state-view-provider.ts`.
 
 **Checkpoint (pending Extension Development Host validation)**: User Story 1 is independently functional and passes its unit tests; Extension Development Host tests remain pending as noted in T016.
 
@@ -68,10 +68,10 @@ description: "Task list for AI-DLC State Tracker implementation"
 
 **Purpose**: Validate the complete MVP and its user-facing documentation.
 
-- [X] T013 [P] Document extension installation, opening the tracker, and supported workspace behavior in `ai-dlc-state-tracker/README.md`.
-- [X] T014 Run compile, unit tests, dependency audit, and VSIX packaging from `specs/001-ai-dlc-state-tracker/quickstart.md`; resolve any implementation regressions in the corresponding `ai-dlc-state-tracker/` files.
-- [X] T015 Review extension permissions, webview security policy, and workspace-content handling against the constitution in `ai-dlc-state-tracker/src/state-view-provider.ts` and `ai-dlc-state-tracker/package.json`.
-- [ ] T016 Run Extension Development Host tests and manually verify view rendering and file updates in `ai-dlc-state-tracker/src/test/extension.test.ts`; VS Code download is currently blocked by unavailable network DNS.
+- [X] T013 [P] Document extension installation, opening the tracker, and supported workspace behavior in `extensions/ai-dlc-state-tracker/README.md`.
+- [X] T014 Run compile, unit tests, dependency audit, and VSIX packaging from `specs/001-ai-dlc-state-tracker/quickstart.md`; resolve any implementation regressions in the corresponding `extensions/ai-dlc-state-tracker/` files.
+- [X] T015 Review extension permissions, webview security policy, and workspace-content handling against the constitution in `extensions/ai-dlc-state-tracker/src/state-view-provider.ts` and `extensions/ai-dlc-state-tracker/package.json`.
+- [ ] T016 Run Extension Development Host tests and manually verify view rendering and file updates in `extensions/ai-dlc-state-tracker/src/test/extension.test.ts`; VS Code download is currently blocked by unavailable network DNS.
 
 ---
 
@@ -106,8 +106,8 @@ description: "Task list for AI-DLC State Tracker implementation"
 ## Parallel Example: User Story 1
 
 ```text
-Task: T006 — Add state file selection and availability unit tests in ai-dlc-state-tracker/src/test/unit/state-file.test.ts
-Task: T007 — Add Markdown safety tests in ai-dlc-state-tracker/src/test/unit/markdown-renderer.test.ts
+Task: T006 — Add state file selection and availability unit tests in extensions/ai-dlc-state-tracker/src/test/unit/state-file.test.ts
+Task: T007 — Add Markdown safety tests in extensions/ai-dlc-state-tracker/src/test/unit/markdown-renderer.test.ts
 ```
 
 ## Implementation Strategy
