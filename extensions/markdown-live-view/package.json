@@ -1,0 +1,68 @@
+{
+  "name": "markdown-live-view",
+  "displayName": "Markdown Live View",
+  "description": "Edit Markdown with an inline rendered live view.",
+  "version": "0.0.1",
+  "publisher": "m3-welch",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onCustomEditor:markdownLiveView.editor",
+    "onCommand:markdownLiveView.openLive",
+    "onCommand:markdownLiveView.openSource"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "markdownLiveView.openLive",
+        "title": "Open Markdown Live View"
+      },
+      {
+        "command": "markdownLiveView.openSource",
+        "title": "Open as Markdown Source"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "markdownLiveView.editor",
+        "displayName": "Markdown Live View",
+        "selector": [
+          {
+            "filenamePattern": "**/*.md"
+          },
+          {
+            "filenamePattern": "**/*.markdown"
+          }
+        ],
+        "priority": "option"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "node esbuild.js && tsc",
+    "vscode:prepublish": "npm run compile",
+    "check-types": "tsc --noEmit",
+    "test:unit": "npm run compile && node --test test/unit/*.test.cjs",
+    "test:integration": "npm run compile && node test/runTest.cjs",
+    "test": "npm run check-types && npm run test:unit && npm run test:integration"
+  },
+  "devDependencies": {
+    "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
+    "@lezer/markdown": "^1.8.1",
+    "@types/node": "^22.15.30",
+    "@types/vscode": "~1.100.0",
+    "@vscode/test-electron": "^3.1.0",
+    "esbuild": "^0.28.2",
+    "mermaid": "^12.3.0",
+    "typescript": "^7.0.2"
+  }
+}
