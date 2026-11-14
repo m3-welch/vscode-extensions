@@ -1,0 +1,66 @@
+name: Publish extensions
+
+on:
+  workflow_dispatch:
+    inputs:
+      extensions:
+        description: 'Comma-separated extension directory names, or "all". Names are discovered from extensions/.'
+        required: true
+        default: all
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.actor == 'm3-welch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve extension selection
+        id: selection
+        env:
+          EXTENSIONS_INPUT: ${{ inputs.extensions }}
+        run: |
+          available="$(node .github/scripts/select-extensions.mjs --list)"
+          {
+            echo '### Available extensions'
+            echo
+            node -e 'JSON.parse(process.argv[1]).forEach((name) => console.log(`- \`${name}\``))' "$available"
+          } >> "$GITHUB_STEP_SUMMARY"
+          selection="$(node .github/scripts/select-extensions.mjs "$EXTENSIONS_INPUT")"
+          echo "extensions=$selection" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies and compile
+        env:
+          SELECTION: ${{ steps.selection.outputs.extensions }}
+        run: |
+          mapfile -t extensions < <(node -e 'JSON.parse(process.argv[1]).forEach((name) => console.log(name))' "$SELECTION")
+          npm install --global @vscode/vsce@4.1.1
+          for extension in "${extensions[@]}"; do
+            directory="extensions/$extension"
+            npm ci --prefix "$directory"
+            pushd "$directory" >/dev/null
+            vsce package --out "$RUNNER_TEMP/$extension.vsix"
+            popd >/dev/null
+          done
+
+      - name: Publish selected extensions
+        env:
+          SELECTION: ${{ steps.selection.outputs.extensions }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if [[ -z "$VSCE_PAT" ]]; then
+            echo 'Set the VSCE_PAT repository secret to publish extensions.' >&2
+            exit 1
+          fi
+          mapfile -t extensions < <(node -e 'JSON.parse(process.argv[1]).forEach((name) => console.log(name))' "$SELECTION")
+          for extension in "${extensions[@]}"; do
+            vsce publish --pat "$VSCE_PAT" --packagePath "$RUNNER_TEMP/$extension.vsix"
+          done
