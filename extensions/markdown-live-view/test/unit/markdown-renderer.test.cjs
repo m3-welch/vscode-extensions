@@ -88,3 +88,38 @@ test('parses a large document into independently addressable blocks', () => {
   assert.equal(elements.filter((element) => element.kind === 'heading').length, 1000);
   assert.equal(elements.filter((element) => element.kind === 'paragraph').length, 1000);
 });
+
+test('replaces ordered list source markers with number-preserving widgets', () => {
+  const { EditorState } = require('@codemirror/state');
+  const { markdownSupport } = require('../../out/src/markdown-language.js');
+  const { createMarkdownRenderingExtension } = require('../../out/src/markdown-renderer.js');
+  const markdown = 'Outside\n\n3. first\n4) second\n   12. nested\n5. [x] task';
+  const rendering = createMarkdownRenderingExtension('');
+  const state = EditorState.create({
+    doc: markdown,
+    selection: { anchor: 0 },
+    extensions: [markdownSupport, rendering]
+  });
+  const markers = [];
+  state.field(rendering).decorations.between(0, markdown.length, (from, to, decoration) => {
+    if (decoration.spec.widget?.constructor.name === 'OrderedListMarkerWidget') {
+      markers.push({ from, to, widget: decoration.spec.widget });
+    }
+  });
+
+  assert.deepEqual(markers.map(({ from, to }) => markdown.slice(from, to)), [
+    '3.', '4)', '12.', '5.'
+  ]);
+  assert.equal(state.doc.toString(), markdown);
+  const activeState = state.update({ selection: { anchor: markdown.indexOf('first') } }).state;
+  assert.ok(activeState.field(rendering).decorations.iter(markdown.indexOf('3.')).value.spec.widget);
+  const originalDocument = global.document;
+  try {
+    global.document = { createElement: () => ({}) };
+    assert.deepEqual(markers.map(({ widget }) => widget.toDOM().textContent), [
+      '3.', '4.', '12.', '5.'
+    ]);
+  } finally {
+    global.document = originalDocument;
+  }
+});

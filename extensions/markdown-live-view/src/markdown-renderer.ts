@@ -196,6 +196,23 @@ class BulletWidget extends WidgetType {
   }
 }
 
+class OrderedListMarkerWidget extends WidgetType {
+  constructor(private readonly number: string) {
+    super();
+  }
+
+  toDOM(): HTMLElement {
+    const marker = document.createElement('span');
+    marker.className = 'md-live-ordered-marker';
+    marker.textContent = `${this.number}.`;
+    return marker;
+  }
+
+  eq(other: OrderedListMarkerWidget): boolean {
+    return this.number === other.number;
+  }
+}
+
 class TaskCheckboxWidget extends WidgetType {
   constructor(private readonly checked: boolean) {
     super();
@@ -505,6 +522,13 @@ function decorationsFor(
 
   for (const mark of listMarks) {
     if (mark.ordered) {
+      add(
+        mark.from,
+        mark.to,
+        Decoration.replace({
+          widget: new OrderedListMarkerWidget(state.sliceDoc(mark.from, mark.to).slice(0, -1))
+        })
+      );
       continue;
     }
     add(
