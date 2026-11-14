@@ -3,8 +3,6 @@ name: Publish extensions
 on:
   workflow_dispatch:
     inputs:
-      # Regenerate with: node .github/scripts/select-extensions.mjs --sync-workflow
-      # BEGIN GENERATED EXTENSION INPUTS
       all:
         description: 'Publish all extensions'
         type: boolean
@@ -13,7 +11,6 @@ on:
         description: 'markdown-live-view'
         type: boolean
         default: false
-      # END GENERATED EXTENSION INPUTS
 
 permissions:
   contents: read
@@ -35,7 +32,6 @@ jobs:
         env:
           INPUTS_JSON: ${{ toJSON(inputs) }}
         run: |
-          node .github/scripts/select-extensions.mjs --check-workflow
           available="$(node .github/scripts/select-extensions.mjs --list)"
           {
             echo '### Available extensions'
