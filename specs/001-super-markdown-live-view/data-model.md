@@ -1,4 +1,4 @@
-# Data Model: Markdown Live View
+# Data Model: Super Markdown Live View
 
 ## Markdown Document
 

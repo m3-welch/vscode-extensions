@@ -10,7 +10,7 @@
 
 The extension contributes discoverable commands to open the active Markdown document in each view:
 
-- **Open Markdown Live View**: opens the active Markdown document in the custom editor.
+- **Open Super Markdown Live View**: opens the active Markdown document in the custom editor.
 - **Open as Markdown Source**: opens the same document in the standard text editor.
 
 When switching, transfer active selections (including multiple selections) and scroll position where available. Do not write document content, discard edits, or save implicitly.

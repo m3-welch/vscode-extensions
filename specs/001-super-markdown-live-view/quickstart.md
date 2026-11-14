@@ -1,4 +1,4 @@
-# Quickstart: Markdown Live View
+# Quickstart: Super Markdown Live View
 
 This guide describes validation scenarios for the extension after its implementation and scaffold are created in `extensions/super-markdown-live-view/`.
 
@@ -18,7 +18,7 @@ From `extensions/super-markdown-live-view/`:
 
 ## End-to-end scenarios
 
-1. **Render and reveal source**: Open the Markdown fixture containing headings, paragraphs, emphasis, links, images, ordered/unordered lists, block quotes, inline/fenced code, and tables in Markdown Live View. Confirm supported inactive elements render, then move the text caret through several elements and confirm source follows the caret. Move the pointer without moving the caret and confirm visibility is unchanged.
+1. **Render and reveal source**: Open the Markdown fixture containing headings, paragraphs, emphasis, links, images, ordered/unordered lists, block quotes, inline/fenced code, and tables in Super Markdown Live View. Confirm supported inactive elements render, then move the text caret through several elements and confirm source follows the caret. Move the pointer without moving the caret and confirm visibility is unchanged.
 2. **Editing and selections**: Edit rendered text, select across elements, use multiple carets, and verify only user edits change the saved Markdown. Confirm all active source ranges remain visible.
 3. **History and external changes**: Edit, undo, and redo; make a change in another editor session; confirm the live view matches the canonical document and undo history.
 4. **Switch and persistence**: Switch between live and plain-source commands with unsaved edits and multiple selections. Confirm the same URI, content, caret/selections, and dirty state are retained; save, close, reopen, and confirm content and rendering.

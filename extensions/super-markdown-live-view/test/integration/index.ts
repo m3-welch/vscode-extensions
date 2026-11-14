@@ -2,7 +2,7 @@ import * as assert from 'node:assert/strict';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import { MARKDOWN_LIVE_VIEW_TYPE } from '../../src/super-markdown-live-view-provider';
+import { SUPER_MARKDOWN_LIVE_VIEW_TYPE } from '../../src/super-markdown-live-view-provider';
 
 export async function run(): Promise<void> {
   const extension = vscode.extensions.getExtension('m3-welch.super-markdown-live-view');
@@ -10,15 +10,15 @@ export async function run(): Promise<void> {
   await extension.activate();
 
   const commands = await vscode.commands.getCommands(true);
-  assert.ok(commands.includes('markdownLiveView.openLive'));
-  assert.ok(commands.includes('markdownLiveView.openSource'));
+  assert.ok(commands.includes('superMarkdownLiveView.openLive'));
+  assert.ok(commands.includes('superMarkdownLiveView.openSource'));
 
   const uri = vscode.Uri.file(path.join(os.tmpdir(), `super-markdown-live-view-${Date.now()}.md`));
   const content = '# Smoke test\n\nOriginal Markdown stays canonical.\n';
   await vscode.workspace.fs.writeFile(uri, Buffer.from(content));
   try {
     let document = await vscode.workspace.openTextDocument(uri);
-    await vscode.commands.executeCommand('vscode.openWith', uri, MARKDOWN_LIVE_VIEW_TYPE);
+    await vscode.commands.executeCommand('vscode.openWith', uri, SUPER_MARKDOWN_LIVE_VIEW_TYPE);
     await delay(500);
     assert.equal(document.getText(), content);
 
@@ -36,13 +36,13 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand('redo');
     assert.equal(document.getText(), editedContent);
 
-    await vscode.commands.executeCommand('markdownLiveView.openSource');
+    await vscode.commands.executeCommand('superMarkdownLiveView.openSource');
     await delay(250);
     assert.equal(document.isDirty, true);
     assert.equal(document.getText(), editedContent);
     assert.equal(vscode.window.activeTextEditor?.document.uri.toString(), uri.toString());
 
-    await vscode.commands.executeCommand('markdownLiveView.openLive');
+    await vscode.commands.executeCommand('superMarkdownLiveView.openLive');
     await delay(250);
     assert.equal(document.isDirty, true);
     assert.equal(document.getText(), editedContent);
@@ -50,7 +50,7 @@ export async function run(): Promise<void> {
 
     await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
     document = await vscode.workspace.openTextDocument(uri);
-    await vscode.commands.executeCommand('vscode.openWith', uri, MARKDOWN_LIVE_VIEW_TYPE);
+    await vscode.commands.executeCommand('vscode.openWith', uri, SUPER_MARKDOWN_LIVE_VIEW_TYPE);
     await delay(500);
     assert.equal(document.getText(), editedContent);
   } finally {

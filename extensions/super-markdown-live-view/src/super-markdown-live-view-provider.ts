@@ -4,16 +4,16 @@ import * as vscode from 'vscode';
 import { DocumentSync, WebviewPanelState } from './document-sync';
 import { StoredViewState } from './view-state';
 
-export const MARKDOWN_LIVE_VIEW_TYPE = 'markdownLiveView.editor';
+export const SUPER_MARKDOWN_LIVE_VIEW_TYPE = 'superMarkdownLiveView.editor';
 
-export class MarkdownLiveViewProvider implements vscode.CustomTextEditorProvider {
+export class SuperMarkdownLiveViewProvider implements vscode.CustomTextEditorProvider {
   private readonly sync: DocumentSync;
   private readonly viewStates = new Map<string, StoredViewState>();
 
   constructor(private readonly context: vscode.ExtensionContext) {
     this.sync = new DocumentSync(context);
     context.subscriptions.push(
-      vscode.window.registerCustomEditorProvider(MARKDOWN_LIVE_VIEW_TYPE, this, {
+      vscode.window.registerCustomEditorProvider(SUPER_MARKDOWN_LIVE_VIEW_TYPE, this, {
         webviewOptions: { retainContextWhenHidden: true },
         supportsMultipleEditorsPerDocument: true
       })
@@ -44,7 +44,7 @@ export class MarkdownLiveViewProvider implements vscode.CustomTextEditorProvider
     if (state) {
       this.viewStates.set(uri.toString(), state);
     }
-    await vscode.commands.executeCommand('vscode.openWith', uri, MARKDOWN_LIVE_VIEW_TYPE);
+    await vscode.commands.executeCommand('vscode.openWith', uri, SUPER_MARKDOWN_LIVE_VIEW_TYPE);
   }
 
   async openSource(uri: vscode.Uri, state?: StoredViewState): Promise<void> {
@@ -116,10 +116,10 @@ export class MarkdownLiveViewProvider implements vscode.CustomTextEditorProvider
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src 'unsafe-inline' ${webview.cspSource}; script-src 'nonce-${nonce}';">
   <link rel="stylesheet" href="${styles}">
-  <title>Markdown Live View</title>
+  <title>Super Markdown Live View</title>
 </head>
 <body>
-  <main id="editor" aria-label="Markdown Live View editor"></main>
+  <main id="editor" aria-label="Super Markdown Live View editor"></main>
   <script nonce="${nonce}" src="${script}"></script>
 </body>
 </html>`;

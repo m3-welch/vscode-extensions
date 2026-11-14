@@ -1,4 +1,4 @@
-# Research: Markdown Live View
+# Research: Super Markdown Live View
 
 ## Decisions
 

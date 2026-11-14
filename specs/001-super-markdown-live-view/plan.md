@@ -1,4 +1,4 @@
-# Implementation Plan: Markdown Live View
+# Implementation Plan: Super Markdown Live View
 
 **Branch**: `001-super-markdown-live-view` | **Date**: 2026-11-13 | **Spec**: [spec.md](spec.md)
 
