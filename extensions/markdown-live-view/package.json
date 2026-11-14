@@ -59,9 +59,10 @@
     "@codemirror/view": "^6.43.15",
     "@lezer/markdown": "^1.8.1",
     "@types/node": "^22.15.30",
-    "@types/vscode": "^1.146.0",
+    "@types/vscode": "~1.100.0",
     "@vscode/test-electron": "^3.1.0",
     "esbuild": "^0.28.2",
+    "mermaid": "^12.3.0",
     "typescript": "^7.0.2"
   }
 }

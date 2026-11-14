@@ -20,7 +20,7 @@ Create a VS Code extension that presents Markdown in a rendered, editable live v
 
 **Target Platform**: VS Code desktop extension host with a local webview.
 
-**Project Type**: Single VS Code extension, planned under `markdown-live-view/`.
+**Project Type**: Single VS Code extension, planned under `extensions/markdown-live-view/`.
 
 **Performance Goals**: The specification defines no numeric latency target. Keep selection/render updates responsive on representative long Markdown documents and validate with a large-document fixture.
 
@@ -60,7 +60,7 @@ specs/001-markdown-live-view/
 ### Source Code (repository root)
 
 ```text
-markdown-live-view/
+extensions/markdown-live-view/
 ├── package.json
 ├── tsconfig.json
 ├── src/
@@ -76,7 +76,7 @@ markdown-live-view/
     └── integration/
 ```
 
-**Structure Decision**: Keep the extension isolated in `markdown-live-view/`, since the repository currently contains Spec Kit documentation but no extension implementation or shared build/test configuration. Keep extension-host document synchronization separate from webview rendering and editing.
+**Structure Decision**: Keep the extension isolated in `extensions/markdown-live-view/`, since the repository currently contains Spec Kit documentation but no extension implementation or shared build/test configuration. Keep extension-host document synchronization separate from webview rendering and editing.
 
 ## Complexity Tracking
 

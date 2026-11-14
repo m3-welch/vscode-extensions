@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'node:path';
-import { EditChange, isWebviewEditMessage, WebviewEditMessage } from './message-validation';
+import { classifyLink, EditChange, isWebviewEditMessage, WebviewEditMessage } from './message-validation';
 import { StoredViewState } from './view-state';
 
 export interface WebviewPanelState {
@@ -63,6 +63,18 @@ export class DocumentSync {
     this.panels.delete(uri.toString());
   }
 
+  private async openLink(documentUri: vscode.Uri, href: unknown): Promise<void> {
+    const target = classifyLink(href);
+    if (target?.kind === 'external') {
+      await vscode.env.openExternal(vscode.Uri.parse(target.url, true));
+    } else if (target?.kind === 'file') {
+      await vscode.commands.executeCommand(
+        'vscode.open',
+        vscode.Uri.joinPath(documentUri, '..', target.path)
+      );
+    }
+  }
+
   private async onMessage(panelState: WebviewPanelState, value: unknown): Promise<void> {
     if (!value || typeof value !== 'object') {
       return;
@@ -79,6 +91,11 @@ export class DocumentSync {
       if (state) {
         stateViewState.set(panelState.panel, state);
       }
+      return;
+    }
+
+    if (message.type === 'openLink') {
+      await this.openLink(panelState.document.uri, message.href);
       return;
     }
 

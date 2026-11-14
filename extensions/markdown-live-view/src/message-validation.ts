@@ -11,6 +11,35 @@ export interface WebviewEditMessage {
   changes: EditChange[];
 }
 
+export type LinkTarget = { kind: 'external'; url: string } | { kind: 'file'; path: string };
+
+const MAX_LINK_LENGTH = 2048;
+const EXTERNAL_SCHEMES = new Set(['http', 'https', 'mailto']);
+
+export function classifyLink(href: unknown): LinkTarget | undefined {
+  if (typeof href !== 'string' || href.length === 0 || href.length > MAX_LINK_LENGTH) {
+    return undefined;
+  }
+
+  const scheme = /^([a-z][a-z\d+.-]*):/i.exec(href);
+  if (scheme) {
+    return EXTERNAL_SCHEMES.has(scheme[1].toLowerCase()) ? { kind: 'external', url: href } : undefined;
+  }
+  if (href.startsWith('#') || href.startsWith('/') || href.startsWith('\\')) {
+    return undefined;
+  }
+
+  const path = href.split(/[?#]/)[0];
+  if (!path) {
+    return undefined;
+  }
+  try {
+    return { kind: 'file', path: decodeURIComponent(path) };
+  } catch {
+    return undefined;
+  }
+}
+
 const MAX_CHANGES = 1000;
 const MAX_INSERT_LENGTH = 1_000_000;
 

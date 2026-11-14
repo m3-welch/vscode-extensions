@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { isWebviewEditMessage } = require('../../dist/unit/message-validation.js');
+const { classifyLink, isWebviewEditMessage } = require('../../dist/unit/message-validation.js');
 const { normalizeViewState } = require('../../dist/unit/view-state.js');
 
 test('accepts version-matched non-overlapping edits within the document', () => {
@@ -96,4 +96,18 @@ test('normalizes restored selections and scroll state to current document bounds
       scrollAnchor: 0
     }
   );
+});
+
+test('classifies only safe link targets', () => {
+  assert.deepEqual(classifyLink('https://example.com/a'), {
+    kind: 'external',
+    url: 'https://example.com/a'
+  });
+  assert.deepEqual(classifyLink('mailto:a@b.c'), { kind: 'external', url: 'mailto:a@b.c' });
+  assert.deepEqual(classifyLink('../docs/a%20b.md#top'), { kind: 'file', path: '../docs/a b.md' });
+  assert.equal(classifyLink('command:workbench.action.reloadWindow'), undefined);
+  assert.equal(classifyLink('vscode://file/etc/passwd'), undefined);
+  assert.equal(classifyLink('#heading'), undefined);
+  assert.equal(classifyLink('/etc/passwd'), undefined);
+  assert.equal(classifyLink(42), undefined);
 });

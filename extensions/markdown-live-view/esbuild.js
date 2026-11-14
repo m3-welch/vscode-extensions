@@ -26,6 +26,7 @@ async function build() {
     esbuild.build({
       entryPoints: ['src/markdown-renderer.ts'],
       bundle: true,
+      external: ['mermaid'],
       platform: 'node',
       format: 'cjs',
       target: 'node20',

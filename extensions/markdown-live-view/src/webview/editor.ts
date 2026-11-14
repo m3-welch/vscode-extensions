@@ -1,7 +1,7 @@
 import { ChangeSet, EditorSelection, EditorState, Transaction } from '@codemirror/state';
 import { drawSelection, EditorView, keymap } from '@codemirror/view';
 import { rebaseQueuedChanges } from './change-mapping';
-import { createMarkdownRenderingExtension } from '../markdown-renderer';
+import { createMarkdownRenderingExtension, linkTargetAt } from '../markdown-renderer';
 import { markdownSupport } from '../markdown-language';
 import { StoredViewState } from '../view-state';
 
@@ -154,6 +154,21 @@ function initialize(message: SyncMessage): void {
           EditorState.allowMultipleSelections.of(true),
           drawSelection(),
           createMarkdownRenderingExtension(currentBaseUri),
+          EditorView.domEventHandlers({
+            mousedown(event, view) {
+              if (event.button !== 0 || !(event.ctrlKey || event.metaKey)) {
+                return false;
+              }
+              const position = view.posAtCoords({ x: event.clientX, y: event.clientY });
+              const href = position === null ? undefined : linkTargetAt(view.state, position);
+              if (!href) {
+                return false;
+              }
+              event.preventDefault();
+              vscode.postMessage({ type: 'openLink', href });
+              return true;
+            }
+          }),
           keymap.of([
             {
               key: 'Mod-z',
