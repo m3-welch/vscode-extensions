@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-export const defaultStateFilePath = 'aidlc-docs/aidlc-state.md';
+export const defaultStateFilePath = 'aidlc-state.md';
 
 export type StateFileResult =
 	| { kind: 'loading' }
@@ -42,5 +42,39 @@ export function classifyFileRead(
 
 export function resolveStatePath(folderPath: string, configured: string | undefined): string {
 	const value = configured?.trim() || defaultStateFilePath;
-	return path.isAbsolute(value) ? path.normalize(value) : path.join(folderPath, value);
+	const relativePath = normalizeStateFilePath(value);
+	if (!relativePath) {
+		throw new Error('The state file path must be relative to and contained within the workspace folder.');
+	}
+
+	return path.join(folderPath, ...relativePath.split('/'));
+}
+
+export function normalizeStateFilePath(configured: string | undefined): string | undefined {
+	const value = configured?.trim() || defaultStateFilePath;
+	if (
+		value.startsWith('/') ||
+		value.startsWith('\\') ||
+		/^[A-Za-z]:/.test(value) ||
+		/^[A-Za-z][A-Za-z\d+.-]*:/.test(value)
+	) {
+		return undefined;
+	}
+
+	const segments: string[] = [];
+	for (const segment of value.replace(/\\/g, '/').split('/')) {
+		if (!segment || segment === '.') {
+			continue;
+		}
+		if (segment === '..') {
+			if (segments.length === 0) {
+				return undefined;
+			}
+			segments.pop();
+		} else {
+			segments.push(segment);
+		}
+	}
+
+	return segments.length > 0 ? segments.join('/') : undefined;
 }

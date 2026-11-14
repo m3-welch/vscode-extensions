@@ -7,7 +7,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/m3-welch/vscode-extensions.git",
-    "directory": "ai-dlc-state-tracker"
+    "directory": "extensions/ai-dlc-state-tracker"
   },
   "engines": {
     "vscode": "^1.90.0"
@@ -32,9 +32,9 @@
       "properties": {
         "ai-dlc-state-tracker.stateFilePath": {
           "type": "string",
-          "default": "aidlc-docs/aidlc-state.md",
+          "default": "aidlc-state.md",
           "scope": "resource",
-          "description": "Path to the AI-DLC state file, absolute or relative to the workspace folder. Used by the tracker view and the at-a-glance tracker."
+          "description": "Path to the AI-DLC state file, relative to and contained within the workspace folder."
         }
       }
     },

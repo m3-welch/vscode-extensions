@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { defaultStateFilePath, resolveStatePath } from './state-file-model';
+import { defaultStateFilePath, normalizeStateFilePath } from './state-file-model';
 
 export const stateFilePathSetting = 'ai-dlc-state-tracker.stateFilePath';
 
@@ -7,7 +7,12 @@ export function resolveStateFileUri(folder: vscode.WorkspaceFolder): vscode.Uri 
 	const configured = vscode.workspace
 		.getConfiguration(undefined, folder.uri)
 		.get<string>(stateFilePathSetting);
-	return vscode.Uri.file(resolveStatePath(folder.uri.fsPath, configured));
+	const relativePath = normalizeStateFilePath(configured);
+	if (!relativePath) {
+		throw new Error('The state file path must be relative to and contained within the workspace folder.');
+	}
+
+	return vscode.Uri.joinPath(folder.uri, ...relativePath.split('/'));
 }
 
 // Returns true when the setting was updated.
@@ -22,7 +27,7 @@ export async function pickStateFilePath(): Promise<boolean> {
 	const current = config.get<string>(stateFilePathSetting) ?? defaultStateFilePath;
 	const value = await vscode.window.showInputBox({
 		title: 'AI-DLC State File Path',
-		prompt: 'Absolute path, or path relative to the workspace folder. Leave empty to restore the default.',
+		prompt: 'Path relative to the workspace folder. Leave empty to restore the default.',
 		value: current,
 		placeHolder: defaultStateFilePath,
 	});

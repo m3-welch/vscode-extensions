@@ -15,7 +15,20 @@ export class StateFileMonitor implements vscode.Disposable {
 	constructor(private readonly onChange: (result: StateFileResult) => void) {}
 
 	async watch(folder: vscode.WorkspaceFolder | undefined): Promise<void> {
-		const target = folder ? resolveStateFileUri(folder) : undefined;
+		let target: vscode.Uri | undefined;
+		try {
+			target = folder ? resolveStateFileUri(folder) : undefined;
+		} catch (error) {
+			this.initialized = true;
+			this.clearWatcher();
+			this.folder = folder;
+			this.target = undefined;
+			this.generation++;
+			this.readSequence++;
+			this.onChange(classifyFileRead(undefined, error));
+			return;
+		}
+
 		if (this.initialized && this.target?.toString() === target?.toString()) {
 			this.folder = folder;
 			await this.refresh();

@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { StateFileMonitor } from '../state-file';
 import type { StateFileResult } from '../state-file-model';
+import { resolveStateFileUri } from '../state-file-path';
 
 suite('AI-DLC State Tracker', () => {
 	test('contributes an identifiable view and an open command', async () => {
@@ -31,9 +32,19 @@ suite('AI-DLC State Tracker', () => {
 		}
 	});
 
+	test('preserves the workspace URI scheme when resolving the state file', () => {
+		const folderUri = vscode.Uri.parse('vscode-remote://ssh-remote+host/workspace');
+		const folder = { uri: folderUri } as vscode.WorkspaceFolder;
+
+		const stateFileUri = resolveStateFileUri(folder);
+
+		assert.equal(stateFileUri.scheme, folderUri.scheme);
+		assert.equal(stateFileUri.authority, folderUri.authority);
+		assert.equal(stateFileUri.path, '/workspace/aidlc-state.md');
+	});
+
 	test('tracks creation, updates, and deletion of the state file', async () => {
 		const directory = vscode.Uri.file(path.join(os.tmpdir(), `ai-dlc-state-${Date.now()}`));
-		await vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(directory, 'aidlc-docs'));
 		const added = vscode.workspace.updateWorkspaceFolders(0, 0, {
 			uri: directory,
 			name: 'AI-DLC State Tracker Test',
@@ -42,7 +53,7 @@ suite('AI-DLC State Tracker', () => {
 
 		const folder = vscode.workspace.getWorkspaceFolder(directory);
 		assert.ok(folder);
-		const file = vscode.Uri.joinPath(directory, 'aidlc-docs', 'aidlc-state.md');
+		const file = vscode.Uri.joinPath(directory, 'aidlc-state.md');
 		const states: StateFileResult[] = [];
 		const monitor = new StateFileMonitor((state) => states.push(state));
 
