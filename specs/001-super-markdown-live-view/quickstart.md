@@ -1,6 +1,6 @@
 # Quickstart: Markdown Live View
 
-This guide describes validation scenarios for the extension after its implementation and scaffold are created in `extensions/markdown-live-view/`.
+This guide describes validation scenarios for the extension after its implementation and scaffold are created in `extensions/super-markdown-live-view/`.
 
 ## Prerequisites
 
@@ -9,7 +9,7 @@ This guide describes validation scenarios for the extension after its implementa
 
 ## Build and test
 
-From `extensions/markdown-live-view/`:
+From `extensions/super-markdown-live-view/`:
 
 1. Run `npm install` to install the declared extension and test dependencies.
 2. Run `npm test` and confirm unit and extension-host integration tests pass.

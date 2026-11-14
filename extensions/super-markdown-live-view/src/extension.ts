@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { MarkdownLiveViewProvider } from './markdown-live-view-provider';
+import { MarkdownLiveViewProvider } from './super-markdown-live-view-provider';
 import { StoredViewState } from './view-state';
 
 export function activate(context: vscode.ExtensionContext): void {

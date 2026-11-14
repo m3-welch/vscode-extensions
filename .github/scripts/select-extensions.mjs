@@ -24,28 +24,22 @@ export async function listExtensions(extensionsRoot) {
   return extensions.sort();
 }
 
-export function selectExtensions(input, available) {
-  const selection = input.trim();
-  if (selection === 'all') {
+export function selectExtensions(inputs, available) {
+  const selected = available.filter((name) => inputs[name] === true || inputs[name] === 'true');
+  const all = inputs.all === true || inputs.all === 'true';
+
+  if (all) {
     if (available.length === 0) {
       throw new Error('No extension packages were found in extensions/.');
     }
     return [...available];
   }
 
-  const selected = selection.split(',').map((name) => name.trim());
-  if (selected.some((name) => name.length === 0)) {
-    throw new Error('Provide one or more extension directory names, or "all".');
+  if (selected.length === 0) {
+    throw new Error('Select at least one extension, or select "all".');
   }
 
-  const unknown = selected.filter((name) => !available.includes(name));
-  if (unknown.length > 0) {
-    throw new Error(
-      `Unknown extension(s): ${unknown.join(', ')}. Available extensions: ${available.join(', ') || '(none)'}.`,
-    );
-  }
-
-  return [...new Set(selected)];
+  return selected;
 }
 
 async function main() {
@@ -59,10 +53,10 @@ async function main() {
   }
 
   if (argument === undefined) {
-    throw new Error('Pass "all" or a comma-separated list of extension directory names.');
+    throw new Error('Pass the workflow inputs as JSON or --list.');
   }
 
-  console.log(JSON.stringify(selectExtensions(argument, available)));
+  console.log(JSON.stringify(selectExtensions(JSON.parse(argument), available)));
 }
 
 if (path.resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {

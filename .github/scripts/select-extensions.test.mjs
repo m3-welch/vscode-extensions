@@ -18,21 +18,17 @@ test('discovers extension package directories dynamically', async (t) => {
 });
 
 test('selects all discovered extensions', () => {
-  assert.deepEqual(selectExtensions('all', ['alpha', 'zeta']), ['alpha', 'zeta']);
+  assert.deepEqual(selectExtensions({ all: true, alpha: false }, ['alpha', 'zeta']), ['alpha', 'zeta']);
 });
 
-test('selects and trims comma-separated extensions without duplicates', () => {
-  assert.deepEqual(selectExtensions(' zeta, alpha, zeta ', ['alpha', 'zeta']), ['zeta', 'alpha']);
-});
-
-test('rejects extension names outside the discovered list', () => {
-  assert.throws(
-    () => selectExtensions('missing', ['alpha']),
-    /Unknown extension\(s\): missing\. Available extensions: alpha\./,
+test('selects checked extensions in discovery order', () => {
+  assert.deepEqual(
+    selectExtensions({ all: false, zeta: 'true', alpha: true, beta: false }, ['alpha', 'beta', 'zeta']),
+    ['alpha', 'zeta'],
   );
 });
 
 test('rejects empty selections and an empty extension list', () => {
-  assert.throws(() => selectExtensions('alpha,,zeta', ['alpha', 'zeta']), /Provide one or more/);
-  assert.throws(() => selectExtensions('all', []), /No extension packages/);
+  assert.throws(() => selectExtensions({ all: false, alpha: false }, ['alpha']), /Select at least one/);
+  assert.throws(() => selectExtensions({ all: true }, []), /No extension packages/);
 });
