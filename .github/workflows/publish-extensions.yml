@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   publish:
+    if: github.actor == 'm3-welch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
