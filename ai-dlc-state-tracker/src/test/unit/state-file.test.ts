@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyFileRead, selectWorkspaceFolder } from '../../state-file-model';
+import { classifyFileRead, resolveStatePath, selectWorkspaceFolder } from '../../state-file-model';
 
 test('selects the active editor folder when it belongs to the workspace', () => {
 	const folders = [{ name: 'first' }, { name: 'active' }];
@@ -33,4 +33,11 @@ test('distinguishes a missing file from other read errors', () => {
 		kind: 'error',
 		message: 'Permission denied',
 	});
+});
+
+test('resolves the default, relative, and absolute state file paths', () => {
+	assert.equal(resolveStatePath('/ws', undefined), '/ws/aidlc-docs/aidlc-state.md');
+	assert.equal(resolveStatePath('/ws', '  '), '/ws/aidlc-docs/aidlc-state.md');
+	assert.equal(resolveStatePath('/ws', 'docs/state.md'), '/ws/docs/state.md');
+	assert.equal(resolveStatePath('/ws', '/other/state.md'), '/other/state.md');
 });

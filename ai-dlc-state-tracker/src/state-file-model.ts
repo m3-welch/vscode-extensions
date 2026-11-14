@@ -1,3 +1,7 @@
+import * as path from 'path';
+
+export const defaultStateFilePath = 'aidlc-docs/aidlc-state.md';
+
 export type StateFileResult =
 	| { kind: 'loading' }
 	| { kind: 'ready'; content: string }
@@ -34,4 +38,9 @@ export function classifyFileRead(
 		kind: 'error',
 		message: error instanceof Error ? error.message : 'The state file could not be read.',
 	};
+}
+
+export function resolveStatePath(folderPath: string, configured: string | undefined): string {
+	const value = configured?.trim() || defaultStateFilePath;
+	return path.isAbsolute(value) ? path.normalize(value) : path.join(folderPath, value);
 }

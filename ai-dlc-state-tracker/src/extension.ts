@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { pickStateFilePath, stateFilePathSetting } from './state-file-path';
 import { StateViewProvider, viewId } from './state-view-provider';
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -9,6 +10,16 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.commands.registerCommand('ai-dlc-state-tracker.openTracker', async () => {
 			await vscode.commands.executeCommand('workbench.view.explorer');
 			await vscode.commands.executeCommand('workbench.action.focusView', viewId);
+		}),
+		vscode.commands.registerCommand('ai-dlc-state-tracker.setStateFilePath', async () => {
+			if (await pickStateFilePath()) {
+				await provider.refreshWorkspace();
+			}
+		}),
+		vscode.workspace.onDidChangeConfiguration((event) => {
+			if (event.affectsConfiguration(stateFilePathSetting)) {
+				void provider.refreshWorkspace();
+			}
 		}),
 		vscode.window.onDidChangeActiveTextEditor(() => {
 			void provider.refreshWorkspace();

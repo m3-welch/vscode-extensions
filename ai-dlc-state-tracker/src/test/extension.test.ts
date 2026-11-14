@@ -33,7 +33,7 @@ suite('AI-DLC State Tracker', () => {
 
 	test('tracks creation, updates, and deletion of the state file', async () => {
 		const directory = vscode.Uri.file(path.join(os.tmpdir(), `ai-dlc-state-${Date.now()}`));
-		await vscode.workspace.fs.createDirectory(directory);
+		await vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(directory, 'aidlc-docs'));
 		const added = vscode.workspace.updateWorkspaceFolders(0, 0, {
 			uri: directory,
 			name: 'AI-DLC State Tracker Test',
@@ -42,7 +42,7 @@ suite('AI-DLC State Tracker', () => {
 
 		const folder = vscode.workspace.getWorkspaceFolder(directory);
 		assert.ok(folder);
-		const file = vscode.Uri.joinPath(directory, 'aidlc-state.md');
+		const file = vscode.Uri.joinPath(directory, 'aidlc-docs', 'aidlc-state.md');
 		const states: StateFileResult[] = [];
 		const monitor = new StateFileMonitor((state) => states.push(state));
 

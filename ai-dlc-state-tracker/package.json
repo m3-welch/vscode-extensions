@@ -21,8 +21,23 @@
       {
         "command": "ai-dlc-state-tracker.openTracker",
         "title": "AI-DLC State Tracker: Open"
+      },
+      {
+        "command": "ai-dlc-state-tracker.setStateFilePath",
+        "title": "AI-DLC State Tracker: Set State File Path"
       }
     ],
+    "configuration": {
+      "title": "AI-DLC State Tracker",
+      "properties": {
+        "ai-dlc-state-tracker.stateFilePath": {
+          "type": "string",
+          "default": "aidlc-docs/aidlc-state.md",
+          "scope": "resource",
+          "description": "Path to the AI-DLC state file, absolute or relative to the workspace folder. Used by the tracker view and the at-a-glance tracker."
+        }
+      }
+    },
     "views": {
       "explorer": [
         {

@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
+import { resolveStateFileUri } from './state-file-path';
 import { classifyFileRead, type StateFileResult } from './state-file-model';
 
 export class StateFileMonitor implements vscode.Disposable {
 	private folder: vscode.WorkspaceFolder | undefined;
+	private target: vscode.Uri | undefined;
 	private watcher: vscode.FileSystemWatcher | undefined;
 	private watcherSubscriptions: vscode.Disposable[] = [];
 	private debounceTimer: NodeJS.Timeout | undefined;
@@ -13,7 +15,9 @@ export class StateFileMonitor implements vscode.Disposable {
 	constructor(private readonly onChange: (result: StateFileResult) => void) {}
 
 	async watch(folder: vscode.WorkspaceFolder | undefined): Promise<void> {
-		if (this.initialized && this.folder?.uri.toString() === folder?.uri.toString()) {
+		const target = folder ? resolveStateFileUri(folder) : undefined;
+		if (this.initialized && this.target?.toString() === target?.toString()) {
+			this.folder = folder;
 			await this.refresh();
 			return;
 		}
@@ -21,16 +25,17 @@ export class StateFileMonitor implements vscode.Disposable {
 		this.initialized = true;
 		this.clearWatcher();
 		this.folder = folder;
+		this.target = target;
 		const generation = ++this.generation;
 
-		if (!folder) {
+		if (!folder || !target) {
 			this.readSequence++;
 			this.onChange({ kind: 'unavailable' });
 			return;
 		}
 
 		this.watcher = vscode.workspace.createFileSystemWatcher(
-			new vscode.RelativePattern(folder, 'aidlc-state.md'),
+			new vscode.RelativePattern(vscode.Uri.joinPath(target, '..'), basename(target)),
 			false,
 			false,
 			false,
@@ -68,7 +73,7 @@ export class StateFileMonitor implements vscode.Disposable {
 		this.onChange({ kind: 'loading' });
 
 		try {
-			const uri = vscode.Uri.joinPath(folder.uri, 'aidlc-state.md');
+			const uri = resolveStateFileUri(folder);
 			const content = await vscode.workspace.fs.readFile(uri);
 			if (sequence === this.readSequence) {
 				this.onChange(classifyFileRead(content));
@@ -85,6 +90,7 @@ export class StateFileMonitor implements vscode.Disposable {
 		this.readSequence++;
 		this.clearWatcher();
 		this.folder = undefined;
+		this.target = undefined;
 	}
 
 	private clearWatcher(): void {
@@ -98,4 +104,8 @@ export class StateFileMonitor implements vscode.Disposable {
 		this.watcher?.dispose();
 		this.watcher = undefined;
 	}
+}
+
+function basename(uri: vscode.Uri): string {
+	return uri.path.slice(uri.path.lastIndexOf('/') + 1);
 }

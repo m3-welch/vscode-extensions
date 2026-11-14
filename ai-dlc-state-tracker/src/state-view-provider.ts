@@ -65,7 +65,7 @@ export class StateViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				break;
 			case 'missing':
 				title = 'AI-DLC State';
-				body = '<p class="message">No <code>aidlc-state.md</code> file was found in the selected workspace folder.</p>';
+				body = '<p class="message">No state file was found at the configured path. Run <strong>AI-DLC State Tracker: Set State File Path</strong> to change it.</p>';
 				break;
 			case 'unavailable':
 				title = 'AI-DLC State';
