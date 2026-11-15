@@ -16,6 +16,12 @@
     "Other"
   ],
   "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "onView:ai-dlc-state-tracker.stateView",
+    "onCommand:ai-dlc-state-tracker.openTracker",
+    "onCommand:ai-dlc-state-tracker.setStateFilePath"
+  ],
   "contributes": {
     "commands": [
       {
@@ -32,7 +38,7 @@
       "properties": {
         "ai-dlc-state-tracker.stateFilePath": {
           "type": "string",
-          "default": "aidlc-state.md",
+          "default": "aidlc-docs/aidlc-state.md",
           "scope": "resource",
           "description": "Path to the AI-DLC state file, relative to and contained within the workspace folder."
         }

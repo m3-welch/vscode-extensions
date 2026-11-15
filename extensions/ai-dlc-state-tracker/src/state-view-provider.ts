@@ -69,7 +69,7 @@ export class StateViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				break;
 			case 'unavailable':
 				title = 'AI-DLC State';
-				body = '<p class="message">Open a workspace folder to view its <code>aidlc-state.md</code> file.</p>';
+				body = '<p class="message">Open a workspace folder to view its AI-DLC state file.</p>';
 				break;
 			case 'error':
 				title = 'AI-DLC State';

@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-export const defaultStateFilePath = 'aidlc-state.md';
+export const defaultStateFilePath = 'aidlc-docs/aidlc-state.md';
 
 export type StateFileResult =
 	| { kind: 'loading' }
