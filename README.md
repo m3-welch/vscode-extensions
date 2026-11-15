@@ -4,6 +4,8 @@ A collection of VS Code extensions for personal use
 ## Extensions
 
 - [Super Markdown Live View](extensions/super-markdown-live-view/README.md) — edit Markdown with a local rendered live view.
+- [AI-DLC State Tracker](extensions/ai-dlc-state-tracker/README.md): view the workspace's
+  `aidlc-state.md` as rendered Markdown in VS Code.
 
 ## Publishing
 
