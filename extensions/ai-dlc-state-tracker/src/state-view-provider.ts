@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { renderMarkdown } from './markdown-renderer';
+import { renderReport, reportStyles } from './report-renderer';
 import { StateFileMonitor } from './state-file';
 import { selectWorkspaceFolder, type StateFileResult } from './state-file-model';
 
@@ -57,7 +57,7 @@ export class StateViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				break;
 			case 'ready':
 				title = 'AI-DLC State';
-				body = `<article>${renderMarkdown(result.content)}</article>`;
+				body = `<article>${renderReport(result.content)}</article>`;
 				break;
 			case 'empty':
 				title = 'AI-DLC State';
@@ -99,6 +99,7 @@ export class StateViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		th, td { padding: 5px 9px; border: 1px solid var(--vscode-panel-border); }
 		.message { color: var(--vscode-descriptionForeground); }
 		.image-placeholder { color: var(--vscode-descriptionForeground); font-style: italic; }
+		${reportStyles}
 	</style>
 </head>
 <body><h1>${title}</h1>${body}</body>

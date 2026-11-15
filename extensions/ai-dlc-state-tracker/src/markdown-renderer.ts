@@ -15,3 +15,7 @@ markdown.renderer.rules.image = (tokens, index) => {
 export function renderMarkdown(source: string): string {
 	return markdown.render(source);
 }
+
+export function renderInlineMarkdown(source: string): string {
+	return markdown.renderInline(source);
+}
