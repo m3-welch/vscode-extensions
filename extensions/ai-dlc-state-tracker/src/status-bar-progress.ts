@@ -4,10 +4,17 @@ import { StateFileMonitor } from './state-file';
 import { selectWorkspaceFolder, type StateFileResult } from './state-file-model';
 
 export class StatusBarProgress implements vscode.Disposable {
-	private readonly item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-	private readonly monitor = new StateFileMonitor((result) => this.update(result));
+	private readonly item: Pick<vscode.StatusBarItem, 'text' | 'command' | 'tooltip' | 'show' | 'hide' | 'dispose'>;
+	private readonly monitor: Pick<StateFileMonitor, 'watch' | 'dispose'>;
 
-	constructor() {
+	constructor(
+		item: Pick<vscode.StatusBarItem, 'text' | 'command' | 'tooltip' | 'show' | 'hide' | 'dispose'> =
+			vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100),
+		monitorFactory: (onChange: (result: StateFileResult) => void) => Pick<StateFileMonitor, 'watch' | 'dispose'> =
+			(onChange) => new StateFileMonitor(onChange),
+	) {
+		this.item = item;
+		this.monitor = monitorFactory((result) => this.update(result));
 		this.item.command = 'ai-dlc-state-tracker.openTracker';
 		this.item.tooltip = 'Open AI-DLC State Tracker';
 	}

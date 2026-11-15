@@ -3,6 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { StateFileMonitor } from '../state-file';
+import { StatusBarProgress } from '../status-bar-progress';
 import type { StateFileResult } from '../state-file-model';
 import { resolveStateFileUri } from '../state-file-path';
 
@@ -29,6 +30,47 @@ suite('AI-DLC State Tracker', () => {
 			assert.ok(states.some((state) => state.kind === 'unavailable'));
 		} finally {
 			monitor.dispose();
+		}
+	});
+
+	test('shows ready progress, hides unavailable progress, and wires the tracker command', async () => {
+		let shown = 0;
+		let hidden = 0;
+		let update: ((state: StateFileResult) => void) | undefined;
+		const item: Pick<vscode.StatusBarItem, 'text' | 'command' | 'tooltip' | 'show' | 'hide' | 'dispose'> = {
+			text: '',
+			command: undefined,
+			tooltip: undefined,
+			show: () => shown++,
+			hide: () => hidden++,
+			dispose: () => {},
+		};
+		const monitor = { watch: async () => {}, dispose: () => {} };
+		const progress = new StatusBarProgress(item, (onChange) => {
+			update = onChange;
+			return monitor;
+		});
+
+		try {
+			assert.equal(item.command, 'ai-dlc-state-tracker.openTracker');
+			assert.equal(item.tooltip, 'Open AI-DLC State Tracker');
+
+			update?.({ kind: 'ready', content: '## Phase 1: Setup\n- [x] 1.1 Complete\n- [ ] 1.2 Pending' });
+			assert.equal(item.text, 'Phase 1: Setup 1/2 (50%)');
+			assert.equal(shown, 1);
+			assert.equal(hidden, 0);
+
+			update?.({ kind: 'missing' });
+			update?.({ kind: 'ready', content: '# No checklist' });
+			assert.equal(hidden, 2);
+
+			const extension = vscode.extensions.getExtension('m3-welch.ai-dlc-state-tracker');
+			assert.ok(extension);
+			await extension.activate();
+			assert.equal(typeof item.command, 'string');
+			await vscode.commands.executeCommand(item.command as string);
+		} finally {
+			progress.dispose();
 		}
 	});
 
