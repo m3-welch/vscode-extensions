@@ -61,7 +61,7 @@ export class StateViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				break;
 			case 'empty':
 				title = 'AI-DLC State';
-				body = '<p class="message">The <code>aidlc-state.md</code> file is empty.</p>';
+				body = '<p class="message">The configured state file is empty.</p>';
 				break;
 			case 'missing':
 				title = 'AI-DLC State';
