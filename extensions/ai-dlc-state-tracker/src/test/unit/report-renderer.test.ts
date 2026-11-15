@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { renderReport } from '../../report-renderer';
+import { getStateProgress, renderReport } from '../../report-renderer';
 
 const source = [
 	'# State',
@@ -61,4 +61,29 @@ test('falls back to Markdown without checklists and escapes HTML', () => {
 
 	assert.doesNotMatch(html, /<script/i);
 	assert.doesNotMatch(html, /class="report"/);
+});
+
+test('calculates overall progress and selects the explicitly active phase', () => {
+	assert.deepEqual(getStateProgress(source), {
+		stageName: 'Phase 2: B',
+		completed: 3,
+		total: 6,
+		percentage: 50,
+	});
+});
+
+test('uses the next incomplete phase or last phase as the current stage', () => {
+	assert.deepEqual(getStateProgress('## Phase 1\n- [x] Done\n## Phase 2\n- [ ] Next'), {
+		stageName: 'Phase 2',
+		completed: 1,
+		total: 2,
+		percentage: 50,
+	});
+	assert.deepEqual(getStateProgress('## Phase 1\n- [x] Done'), {
+		stageName: 'Phase 1',
+		completed: 1,
+		total: 1,
+		percentage: 100,
+	});
+	assert.equal(getStateProgress('# No checklist'), undefined);
 });

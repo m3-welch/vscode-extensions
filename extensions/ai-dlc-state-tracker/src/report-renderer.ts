@@ -11,6 +11,13 @@ type Section =
 	| { kind: 'phase'; title: string; steps: Step[] }
 	| { kind: 'markdown'; source: string };
 
+export interface StateProgress {
+	stageName: string;
+	completed: number;
+	total: number;
+	percentage: number;
+}
+
 const stepPattern = /^\s*[-*]\s+\[([ xX-])\]\s+(.*\S)\s*$/;
 
 function parseSections(source: string): Section[] {
@@ -58,6 +65,32 @@ function phaseStatus(steps: Step[]): StepStatus {
 		return 'done';
 	}
 	return steps.some((step) => step.status !== 'todo') ? 'active' : 'todo';
+}
+
+export function getStateProgress(source: string): StateProgress | undefined {
+	const phases = parseSections(source).filter(
+		(section): section is Extract<Section, { kind: 'phase' }> => section.kind === 'phase',
+	);
+	if (phases.length === 0) {
+		return undefined;
+	}
+
+	const total = phases.reduce((count, phase) => count + phase.steps.length, 0);
+	const completed = phases.reduce(
+		(count, phase) => count + phase.steps.filter((step) => step.status === 'done').length,
+		0,
+	);
+	const currentPhase =
+		phases.find((phase) => phase.steps.some((step) => step.status === 'active')) ??
+		phases.find((phase) => phase.steps.some((step) => step.status !== 'done')) ??
+		phases[phases.length - 1];
+
+	return {
+		stageName: currentPhase.title,
+		completed,
+		total,
+		percentage: Math.round((completed / total) * 100),
+	};
 }
 
 function renderPhase(title: string, steps: Step[]): string {

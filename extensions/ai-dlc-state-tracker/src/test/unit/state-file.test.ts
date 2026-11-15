@@ -36,8 +36,8 @@ test('distinguishes a missing file from other read errors', () => {
 });
 
 test('resolves the workspace-root default and relative state file paths', () => {
-	assert.equal(resolveStatePath('/ws', undefined), '/ws/aidlc-state.md');
-	assert.equal(resolveStatePath('/ws', '  '), '/ws/aidlc-state.md');
+	assert.equal(resolveStatePath('/ws', undefined), '/ws/aidlc-docs/aidlc-state.md');
+	assert.equal(resolveStatePath('/ws', '  '), '/ws/aidlc-docs/aidlc-state.md');
 	assert.equal(resolveStatePath('/ws', 'docs/state.md'), '/ws/docs/state.md');
 	assert.equal(resolveStatePath('/ws', 'docs/../aidlc-state.md'), '/ws/aidlc-state.md');
 	assert.throws(() => resolveStatePath('/ws', '/other/state.md'), /relative to and contained within/);
