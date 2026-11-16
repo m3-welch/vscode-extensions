@@ -60,14 +60,19 @@ function phaseStatus(steps: Step[]): StepStatus {
 	return steps.some((step) => step.status !== 'todo') ? 'active' : 'todo';
 }
 
-function renderPhase(title: string, steps: Step[]): string {
+function renderPhase(title: string, steps: Step[], hasLaterCompleted: boolean): string {
 	const status = phaseStatus(steps);
 	const done = steps.filter((step) => step.status === 'done').length;
 	const lastCompleted = steps.reduce((last, step, index) => step.status === 'done' ? index : last, -1);
+	const hasActive = steps.some((step) => step.status === 'active');
 	const items = steps
 		.map(
 			(step, index) => {
-				const stepStatus = step.status === 'todo' && index < lastCompleted ? 'skipped' : step.status;
+				const isSkipped = step.status === 'todo' && (
+					index < lastCompleted
+					|| (hasLaterCompleted && done > 0 && !hasActive && index > lastCompleted)
+				);
+				const stepStatus = isSkipped ? 'skipped' : step.status;
 				const description = stepStatus === 'done' ? 'completed' : stepStatus === 'active' ? 'in progress' : stepStatus === 'skipped' ? 'skipped' : 'not started';
 				return `<li class="step ${stepStatus}"><span class="dot" aria-hidden="true"></span><span class="label">${renderInlineMarkdown(step.text)}</span><span class="sr-only"> (${description})</span></li>`;
 			},
@@ -83,9 +88,13 @@ export function renderReport(source: string): string {
 		return renderMarkdown(source);
 	}
 
-	const html = sections
-		.filter((section): section is Extract<Section, { kind: 'phase' }> => section.kind === 'phase')
-		.map((section) => renderPhase(section.title, section.steps))
+	const phases = sections.filter((section): section is Extract<Section, { kind: 'phase' }> => section.kind === 'phase');
+	const html = phases
+		.map((phase, index) => renderPhase(
+			phase.title,
+			phase.steps,
+			phases.slice(index + 1).some((laterPhase) => laterPhase.steps.some((step) => step.status === 'done')),
+		))
 		.join('');
 
 	return `<div class="report">${html}</div>`;
