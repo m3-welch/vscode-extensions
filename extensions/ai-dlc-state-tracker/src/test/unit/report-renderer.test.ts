@@ -56,6 +56,19 @@ test('marks unchecked steps before a later completed step in the same phase as s
 	assert.match(html, /class="step todo">(?:(?!<\/li>)[^])*4\.1 Pending/);
 });
 
+test('marks the final unchecked step in a phase as skipped when a later phase is completed', () => {
+	const html = renderReport([
+		'## Phase 1',
+		'- [x] Completed Stage',
+		'- [ ] Skipped Stage',
+		'## Phase 2',
+		'- [x] Completed Stage',
+	].join('\n'));
+
+	assert.match(html, /class="step skipped">(?:(?!<\/li>)[^])*Skipped Stage(?:(?!<\/li>)[^])*\(skipped\)/);
+	assert.match(html, /class="phase done"><h2>[^<]*<span class="dot" aria-hidden="true"><\/span>Phase 2/);
+});
+
 test('falls back to Markdown without checklists and escapes HTML', () => {
 	const html = renderReport('# T\n\n<script>x</script>');
 
