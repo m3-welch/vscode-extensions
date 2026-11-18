@@ -26,6 +26,8 @@ body {
 
 .cm-line {
   line-height: 1.55;
+  max-width: 80ch;
+  overflow-wrap: anywhere;
 }
 
 .md-live-heading {
@@ -86,13 +88,17 @@ body {
 .md-live-table-widget {
   border-collapse: collapse;
   margin: 0.75em 0;
-  min-width: 20em;
+  width: 100%;
+  max-width: 80ch;
+  table-layout: fixed;
 }
 
 .md-live-table-widget th,
 .md-live-table-widget td {
   border: 1px solid var(--vscode-panel-border);
   padding: 0.25em 0.65em;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .md-live-table-widget th {

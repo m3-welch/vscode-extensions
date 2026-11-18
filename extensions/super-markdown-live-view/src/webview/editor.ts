@@ -151,6 +151,7 @@ function initialize(message: SyncMessage): void {
         selection: selectionFromViewState(message.viewState, message.text.length),
         extensions: [
           markdownSupport,
+          EditorView.lineWrapping,
           EditorState.allowMultipleSelections.of(true),
           drawSelection(),
           createMarkdownRenderingExtension(currentBaseUri),

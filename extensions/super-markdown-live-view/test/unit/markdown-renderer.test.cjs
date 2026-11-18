@@ -1,9 +1,33 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const test = require('node:test');
 const {
   extractMarkdownElements,
   isElementActive
 } = require('../../dist/markdown-renderer.cjs');
+
+test('caps and wraps rendered Markdown lines and table content', () => {
+  const editor = fs.readFileSync(
+    path.join(__dirname, '../../src/webview/editor.ts'),
+    'utf8'
+  );
+  const styles = fs.readFileSync(
+    path.join(__dirname, '../../src/webview/styles.css'),
+    'utf8'
+  );
+
+  assert.match(editor, /EditorView\.lineWrapping/);
+  assert.match(styles, /\.cm-line\s*\{[^}]*max-width:\s*80ch;[^}]*overflow-wrap:\s*anywhere;/s);
+  assert.match(
+    styles,
+    /\.md-live-table-widget\s*\{[^}]*max-width:\s*80ch;[^}]*table-layout:\s*fixed;/s
+  );
+  assert.match(
+    styles,
+    /\.md-live-table-widget td\s*\{[^}]*overflow-wrap:\s*anywhere;[^}]*white-space:\s*normal;/s
+  );
+});
 
 test('extracts all required supported Markdown element kinds and exact ranges', () => {
   const markdown = [
